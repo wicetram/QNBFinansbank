@@ -2,9 +2,9 @@
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace QNBFinansbank.VirtualPos.Utilities
+namespace QNBFinansbank.VirtualPos.Utility.Serialization
 {
-    public static class XMLManager
+    public static class XmlHelper
     {
         /// <summary>
         /// Verilen objeyi XML string'e çevirir.

@@ -11,6 +11,9 @@ using QNBFinansbank.VirtualPos.Entity.Response.Payment;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment.NonSecure;
 using QNBFinansbank.VirtualPos.Entity.Response.Refund;
 using QNBFinansbank.VirtualPos.Utilities;
+using QNBFinansbank.VirtualPos.Utility.Cryptography;
+using QNBFinansbank.VirtualPos.Utility.ResponseHandlers;
+using QNBFinansbank.VirtualPos.Utility.Serialization;
 using RestSharp;
 
 namespace QNBFinansbank.VirtualPos.Business.Concrete
@@ -76,7 +79,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     Expiry = startPayment?.Card?.ExpireDate,
                 };
 
-                string body = XMLManager.SerializeToXml(dto);
+                string body = XmlHelper.SerializeToXml(dto);
 
                 var request = new RestRequest { Method = Method.Post };
                 request.AddHeader("Content-Type", "application/xml");
@@ -93,7 +96,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     };
                 }
 
-                var result = XMLManager.DeserializeFromXml<NonSecurePaymentResponseDto>(response.Content);
+                var result = XmlHelper.DeserializeFromXml<NonSecurePaymentResponseDto>(response.Content);
                 if (result == null)
                 {
                     return new PaymentResponseDto

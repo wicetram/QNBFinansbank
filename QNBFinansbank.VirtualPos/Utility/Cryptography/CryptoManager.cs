@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace QNBFinansbank.VirtualPos.Utilities
+namespace QNBFinansbank.VirtualPos.Utility.Cryptography
 {
     public static class CryptoManager
     {

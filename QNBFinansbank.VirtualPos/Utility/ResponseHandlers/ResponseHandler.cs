@@ -1,6 +1,6 @@
 ﻿using QNBFinansbank.VirtualPos.Entity.Response;
 
-namespace QNBFinansbank.VirtualPos.Utilities
+namespace QNBFinansbank.VirtualPos.Utility.ResponseHandlers
 {
     /// <summary>
     /// Yanıtları işlemek için yardımcı metotlar sağlayan sınıf.
