@@ -11,7 +11,7 @@ namespace QNBFinansbank.VirtualPos.Utility
         /// <typeparam name="T">DTO türü.</typeparam>
         /// <param name="dto">NameValueCollection'a dönüştürülecek DTO nesnesi.</param>
         /// <returns>DTO'nun özellik adlarını ve değerlerini içeren NameValueCollection.</returns>
-        public static NameValueCollection ToNameValueCollection<T>(T dto) where T : class
+        public static NameValueCollection ToNameValueCollection<T>(T? dto) where T : class
         {
             if (dto == null)
             {

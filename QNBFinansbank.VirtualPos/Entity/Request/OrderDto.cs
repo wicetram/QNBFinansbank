@@ -47,7 +47,7 @@
 
         /// <summary>
         /// İşlemin güvenlik tipi. 
-        /// Bu özellik, ödeme işleminin güvenlik seviyesini belirtir. Örneğin, 0 (güvenliksiz), 1 (3D Secure) gibi değerler alabilir.
+        /// Bu özellik, ödeme işleminin güvenlik seviyesini belirtir. Örneğin, 0 (NonSecure), 1 (3D Secure) gibi değerler alabilir.
         /// Varsayılan değeri 1 olarak ayarlıdır.
         /// </summary>
         public int PaymentSecurity { get; set; } = 1;
