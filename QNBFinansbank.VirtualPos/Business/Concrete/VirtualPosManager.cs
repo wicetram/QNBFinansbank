@@ -16,8 +16,6 @@ using QNBFinansbank.VirtualPos.Utility.Cryptography;
 using QNBFinansbank.VirtualPos.Utility.ResponseHandlers;
 using QNBFinansbank.VirtualPos.Utility.Serialization;
 using RestSharp;
-using System.Collections.Specialized;
-using System.Text;
 
 namespace QNBFinansbank.VirtualPos.Business.Concrete
 {
@@ -93,11 +91,12 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     OkUrl = startPayment?.Order?.ReturnUrl,
                     FailUrl = startPayment?.Order?.ReturnUrl,
                     Rnd = startPayment?.Order?.Random,
+                    Hash = hash
                 };
 
                 var collection = NameValueCollectionHelper.ToNameValueCollection(startPayment);
 
-                string html = GenerateHtmlForm(collection, startPayment?.Account?.BaseUrl);
+                string html = NameValueCollectionHelper.GenerateHtmlForm(collection, startPayment?.Account?.BaseUrl);
 
                 return new PaymentResponseDto
                 {
@@ -112,32 +111,6 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     Result = ResponseHandler.GetResult(false, 50000, $"{startPayment?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
             }
-        }
-
-
-        /// <summary>
-        /// Verilen NameValueCollection ve action URL'sine göre otomatik olarak submit eden bir HTML formu oluşturur.
-        /// </summary>
-        /// <param name="collection">Form alanlarını temsil eden NameValueCollection nesnesi.</param>
-        /// <param name="actionUrl">Formun gönderileceği URL.</param>
-        /// <returns>Otomatik olarak submit eden bir HTML formunu temsil eden string.</returns>
-        private static string GenerateHtmlForm(NameValueCollection collection, string? actionUrl)
-        {
-            StringBuilder sb = new();
-            sb.AppendLine("<html>");
-            sb.AppendLine("<body onload='document.forms[\"paymentForm\"].submit()'>");
-            sb.AppendLine($"<form name='paymentForm' action='{actionUrl}' method='post'>");
-
-            var inputFields = collection.AllKeys
-                                        .Select(key => $"<input type='hidden' name='{key}' value='{collection[key]}' />");
-
-            sb.AppendLine(string.Join(Environment.NewLine, inputFields));
-
-            sb.AppendLine("</form>");
-            sb.AppendLine("</body>");
-            sb.AppendLine("</html>");
-
-            return sb.ToString();
         }
 
         /// <summary>

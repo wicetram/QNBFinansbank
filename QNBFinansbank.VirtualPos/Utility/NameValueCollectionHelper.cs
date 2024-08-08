@@ -1,5 +1,6 @@
 ﻿using System.Collections.Specialized;
 using System.Reflection;
+using System.Text;
 
 namespace QNBFinansbank.VirtualPos.Utility
 {
@@ -29,6 +30,31 @@ namespace QNBFinansbank.VirtualPos.Utility
                 }
             }
             return nameValueCollection;
+        }
+
+        /// <summary>
+        /// Verilen NameValueCollection ve action URL'sine göre otomatik olarak submit eden bir HTML formu oluşturur.
+        /// </summary>
+        /// <param name="collection">Form alanlarını temsil eden NameValueCollection nesnesi.</param>
+        /// <param name="actionUrl">Formun gönderileceği URL.</param>
+        /// <returns>Otomatik olarak submit eden bir HTML formunu temsil eden string.</returns>
+        public static string GenerateHtmlForm(NameValueCollection collection, string? actionUrl)
+        {
+            StringBuilder sb = new();
+            sb.AppendLine("<html>");
+            sb.AppendLine("<body onload='document.forms[\"paymentForm\"].submit()'>");
+            sb.AppendLine($"<form name='paymentForm' action='{actionUrl}' method='post'>");
+
+            var inputFields = collection.AllKeys
+                                        .Select(key => $"<input type='hidden' name='{key}' value='{collection[key]}' />");
+
+            sb.AppendLine(string.Join(Environment.NewLine, inputFields));
+
+            sb.AppendLine("</form>");
+            sb.AppendLine("</body>");
+            sb.AppendLine("</html>");
+
+            return sb.ToString();
         }
     }
 }
