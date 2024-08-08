@@ -6,10 +6,16 @@ namespace QNBFinansbank.VirtualPos.Utilities
     public static class CryptoManager
     {
         /// <summary>
-        /// SHA1 şifreleme algoritması
+        /// Verilen metni SHA1 algoritması kullanarak şifreler ve Base64 formatında döndürür.
+        /// Bu metod, giriş metnini SHA1 algoritması ile hash'ler ve sonucu Base64 string olarak döner.
         /// </summary>
-        /// <param name="key">Şifrelenecek içerik</param>
-        /// <returns>Base64 string olarak şifrelenmiş veri</returns>
+        /// <param name="key">
+        /// Şifrelenecek metin. Bu metin, SHA1 algoritması ile hash'lenir ve Base64 formatında döndürülür.
+        /// </param>
+        /// <returns>
+        /// Base64 formatında şifrelenmiş veri. Şifreleme başarılı olursa, metnin SHA1 hash'i Base64 olarak döner. 
+        /// Eğer bir hata oluşursa, boş bir dize dönebilir.
+        /// </returns>
         public static string SHA1Encryption(string key)
         {
             string response = string.Empty;
