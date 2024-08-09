@@ -94,13 +94,13 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     Hash = hash
                 };
 
-                var collection = NameValueCollectionHelper.ToNameValueCollection(startPayment);
+                var collection = NameValueCollectionHelper.ToNameValueCollection(dto);
 
                 string html = NameValueCollectionHelper.GenerateHtmlForm(collection, startPayment?.Account?.BaseUrl);
 
                 return new PaymentResponseDto
                 {
-                    Result = ResponseHandler.GetResult(true, 10000, $"NonSecure ödeme işlemi başarılı."),
+                    Result = ResponseHandler.GetResult(true, 10000, $"{startPayment?.Account?.SecureType} ödeme işlemi başarılı."),
                     Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId, html)
                 };
             }

@@ -1,0 +1,209 @@
+﻿@page "/"
+@page "/payment-form"
+
+@inject NavigationManager NavigationManager
+
+<EditForm Model="@paymentRequestData" OnValidSubmit="HandleValidSubmit">
+    <div class="container">
+        <h2 class="mt-4">Payment Request Form</h2>
+        <div class="card mt-4">
+            <div class="card-header">Account Information</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="MbrId" class="form-label">Member ID</label>
+                    <InputText id="MbrId" class="form-control" @bind-Value="paymentRequestData.Account.MbrId" />
+                </div>
+                <div class="mb-3">
+                    <label for="MerchantId" class="form-label">Merchant ID</label>
+                    <InputText id="MerchantId" class="form-control" @bind-Value="paymentRequestData.Account.MerchantId" />
+                </div>
+                <div class="mb-3">
+                    <label for="MerchantPass" class="form-label">Merchant Password</label>
+                    <InputText id="MerchantPass" class="form-control" @bind-Value="paymentRequestData.Account.MerchantPass" />
+                </div>
+                <div class="mb-3">
+                    <label for="UserCode" class="form-label">User Code</label>
+                    <InputText id="UserCode" class="form-control" @bind-Value="paymentRequestData.Account.UserCode" />
+                </div>
+                <div class="mb-3">
+                    <label for="UserPass" class="form-label">User Pass</label>
+                    <InputText id="UserPass" class="form-control" @bind-Value="paymentRequestData.Account.UserPass" />
+                </div>
+                <div class="mb-3">
+                    <label for="SecureType" class="form-label">Secure Type</label>
+                    <InputText id="SecureType" class="form-control" @bind-Value="paymentRequestData.Account.SecureType" />
+                </div>
+                <div class="mb-3">
+                    <label for="TxnType" class="form-label">TxnType</label>
+                    <InputText id="TxnType" class="form-control" @bind-Value="paymentRequestData.Account.TxnType" />
+                </div>
+                <div class="mb-3">
+                    <label for="BaseUrl" class="form-label">BaseUrl</label>
+                    <InputText id="BaseUrl" class="form-control" @bind-Value="paymentRequestData.Account.BaseUrl" />
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">Order Information</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="Installment" class="form-label">Installment</label>
+                    <InputText id="Installment" class="form-control" @bind-Value="paymentRequestData.Order.Installment" />
+                </div>
+                <div class="mb-3">
+                    <label for="Currency" class="form-label">Currency</label>
+                    <InputText id="Currency" class="form-control" @bind-Value="paymentRequestData.Order.Currency" />
+                </div>
+                <div class="mb-3">
+                    <label for="ReturnUrl" class="form-label">Return URL</label>
+                    <InputText id="ReturnUrl" class="form-control" @bind-Value="paymentRequestData.Order.ReturnUrl" />
+                </div>
+                <div class="mb-3">
+                    <label for="OrderId" class="form-label">Order Id</label>
+                    <InputText id="OrderId" class="form-control" @bind-Value="paymentRequestData.Order.OrderId" />
+                </div>
+                <div class="mb-3">
+                    <label for="Amount" class="form-label">Amount</label>
+                    <InputText id="Amount" class="form-control" @bind-Value="paymentRequestData.Order.Amount" />
+                </div>
+                <div class="mb-3">
+                    <label for="Language" class="form-label">Language</label>
+                    <InputText id="Language" class="form-control" @bind-Value="paymentRequestData.Order.Language" />
+                </div>
+                <div class="mb-3">
+                    <label for="PaymentSecurity" class="form-label">Payment Security</label>
+                    <InputNumber id="PaymentSecurity" class="form-control" @bind-Value="paymentRequestData.Order.PaymentSecurity" />
+                </div>
+                <div class="mb-3">
+                    <label for="Random" class="form-label">Random</label>
+                    <InputText id="Random" class="form-control" @bind-Value="paymentRequestData.Order.Random" />
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">Card Information</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="CardNo" class="form-label">Card Number</label>
+                    <InputText id="CardNo" class="form-control" @bind-Value="paymentRequestData.Card.CardNo" />
+                </div>
+                <div class="mb-3">
+                    <label for="CardHolderName" class="form-label">Card Holder Name</label>
+                    <InputText id="CardHolderName" class="form-control" @bind-Value="paymentRequestData.Card.CardHolderName" />
+                </div>
+                <div class="mb-3">
+                    <label for="CVC" class="form-label">CVC</label>
+                    <InputText id="CVC" class="form-control" @bind-Value="paymentRequestData.Card.CVC" />
+                </div>
+                <div class="mb-3">
+                    <label for="ExpireDate" class="form-label">Expire Date</label>
+                    <InputText id="ExpireDate" class="form-control" @bind-Value="paymentRequestData.Card.ExpireDate" />
+                </div>
+                <div class="mb-3">
+                    <label for="Email" class="form-label">Email</label>
+                    <InputText id="Email" class="form-control" @bind-Value="paymentRequestData.Card.Email" />
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4" style="display:none">
+            <div class="card-header">Submerchant Information</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="SubmerchantId" class="form-label">Submerchant ID</label>
+                    <InputText id="SubmerchantId" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubmerchantId" />
+                </div>
+                <div class="mb-3">
+                    <label for="SubmerchantName" class="form-label">Submerchant Name</label>
+                    <InputText id="SubmerchantName" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubmerchantName" />
+                </div>
+                <div class="mb-3">
+                    <label for="SubmerchantIn" class="form-label">Submerchant URL</label>
+                    <InputText id="SubmerchantIn" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubmerchantIn" />
+                </div>
+                <!-- Diğer SubmerchantDto özellikleri için form elemanları buraya eklenir -->
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-4">Submit Payment</button>
+    </div>
+</EditForm>
+
+<!-- Başarısız Ödeme Modalı -->
+<div class="modal fade @modalClass" tabindex="-1" role="dialog" style="display:@modalDisplay;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@title</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <p>@message</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+                @if (!string.IsNullOrEmpty(redirectUrl))
+                {
+                    <button type="button" class="btn btn-success" @onclick="RedirectToPaymentUrl">Redirect</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private PaymentRequestDataDto paymentRequestData = new PaymentRequestDataDto
+        {
+            Account = new AccountDto(),
+            Order = new OrderDto(),
+            Card = new CardDto(),
+            Submerchant = new SubmerchantDto()
+        };
+
+    private string modalClass = "";
+    private string modalDisplay = "none";
+    private string title = "";
+    private string message = "";
+    private string? redirectUrl = "";
+
+    private void HandleValidSubmit()
+    {
+        var response = VirtualPos.Payment(paymentRequestData);
+
+        if (response != null && response.Result != null && response.Payment != null && response.Result.Result)
+        {
+            title = "Ödeme başarılı";
+            redirectUrl = response.Payment.URL; // Ödeme başarılıysa yönlendirme URL'sini al
+        }
+        else
+        {
+            title = "Ödeme başarısız";
+        }
+        message = response?.Result?.ResultMessage ?? "An unknown error occurred.";
+        ShowModal();
+    }
+
+    private void RedirectToPaymentUrl()
+    {
+        if (!string.IsNullOrEmpty(redirectUrl))
+        {
+            NavigationManager.NavigateTo($"/payment-redirect?htmlContent={Uri.EscapeDataString(redirectUrl)}");
+        }
+    }
+
+    private void ShowModal()
+    {
+        modalClass = "show";
+        modalDisplay = "block";
+        StateHasChanged();
+    }
+
+    private void CloseModal()
+    {
+        modalClass = "";
+        modalDisplay = "none";
+        StateHasChanged();
+    }
+}

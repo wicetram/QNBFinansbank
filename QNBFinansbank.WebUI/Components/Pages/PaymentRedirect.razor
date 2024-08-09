@@ -1,0 +1,28 @@
+﻿@page "/payment-redirect"
+
+@layout EmptyLayout
+
+<div id="formContainer">
+    @((MarkupString)HtmlContent)
+</div>
+
+@code {
+    [Parameter]
+    public string? HtmlContent { get; set; }
+
+    protected override void OnInitialized()
+    {
+        var uri = new Uri(Navigation.Uri);
+        var query = HttpUtility.ParseQueryString(uri.Query);
+        HtmlContent = query["htmlContent"];
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var formId = "paymentForm";
+            await JSRuntime.InvokeVoidAsync("submitFormById", formId);
+        }
+    }
+}

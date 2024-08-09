@@ -42,14 +42,15 @@ namespace QNBFinansbank.VirtualPos.Utility
         {
             StringBuilder sb = new();
             sb.AppendLine("<html>");
-            sb.AppendLine("<body onload='document.forms[\"paymentForm\"].submit()'>");
-            sb.AppendLine($"<form name='paymentForm' action='{actionUrl}' method='post'>");
+            sb.AppendLine("<body onload='document.forms[0].submit()'>");
+            sb.AppendLine($"<form name='PostForm' id='paymentForm' method='POST' action='{actionUrl}'><div hidden='hidden'>");
 
             var inputFields = collection.AllKeys
                                         .Select(key => $"<input type='hidden' name='{key}' value='{collection[key]}' />");
 
             sb.AppendLine(string.Join(Environment.NewLine, inputFields));
 
+            sb.AppendLine("</div>");
             sb.AppendLine("</form>");
             sb.AppendLine("</body>");
             sb.AppendLine("</html>");

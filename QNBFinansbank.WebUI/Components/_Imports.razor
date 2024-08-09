@@ -1,0 +1,23 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+@using QNBFinansbank.WebUI
+@using QNBFinansbank.WebUI.Components
+@using System.Web
+@using Microsoft.AspNetCore.Antiforgery;
+@using Microsoft.AspNetCore.Mvc
+
+@using QNBFinansbank.WebUI.Components.Layout
+@using QNBFinansbank.VirtualPos.Business.Abstract
+@using QNBFinansbank.VirtualPos.Entity.Request.Payment
+@using QNBFinansbank.VirtualPos.Entity.Request
+
+@inject IJSRuntime JSRuntime
+@inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager Navigation
+@inject IVirtualPosService VirtualPos;
