@@ -31,7 +31,15 @@
                 </div>
                 <div class="mb-3">
                     <label for="SecureType" class="form-label">Secure Type</label>
-                    <InputText id="SecureType" class="form-control" @bind-Value="paymentRequestData.Account.SecureType" />
+                    <InputSelect id="SecureType" class="form-control" @bind-Value="paymentRequestData.Account.SecureType">
+                        <option value="">Select Secure Type</option>
+                        <option value="NonSecure">NonSecure</option>
+                        <option value="3DPay">3DPay</option>
+                        <option value="3DModel">3DModel</option>
+                        <option value="3DPayHosting">3DPayHosting</option>
+                        <option value="Report">Report</option>
+                        <option value="Inquiry">Inquiry</option>
+                    </InputSelect>
                 </div>
                 <div class="mb-3">
                     <label for="TxnType" class="form-label">TxnType</label>
@@ -61,7 +69,10 @@
                 </div>
                 <div class="mb-3">
                     <label for="OrderId" class="form-label">Order Id</label>
-                    <InputText id="OrderId" class="form-control" @bind-Value="paymentRequestData.Order.OrderId" />
+                    <div class="input-group">
+                        <InputText id="OrderId" class="form-control" @bind-Value="paymentRequestData.Order.OrderId" readonly="@isOrderIdReadonly" />
+                        <button type="button" class="btn btn-secondary" @onclick="GenerateRandomOrderId">Generate</button>
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label for="Amount" class="form-label">Amount</label>
@@ -77,7 +88,10 @@
                 </div>
                 <div class="mb-3">
                     <label for="Random" class="form-label">Random</label>
-                    <InputText id="Random" class="form-control" @bind-Value="paymentRequestData.Order.Random" />
+                    <div class="input-group">
+                        <InputText id="Random" class="form-control" @bind-Value="paymentRequestData.Order.Random" readonly="@isRandomReadonly" />
+                        <button type="button" class="btn btn-secondary" @onclick="GenerateRandomValue">Generate</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -168,6 +182,9 @@
     private string message = "";
     private string? redirectUrl = "";
 
+    private bool isOrderIdReadonly = false;
+    private bool isRandomReadonly = false;
+
     private void HandleValidSubmit()
     {
         var response = VirtualPos.Payment(paymentRequestData);
@@ -191,6 +208,18 @@
         {
             NavigationManager.NavigateTo($"/payment-redirect?htmlContent={Uri.EscapeDataString(redirectUrl)}");
         }
+    }
+
+    private void GenerateRandomOrderId()
+    {
+        paymentRequestData.Order.OrderId = Guid.NewGuid().ToString("N").Substring(0, 10);
+        isOrderIdReadonly = true;
+    }
+
+    private void GenerateRandomValue()
+    {
+        paymentRequestData.Order.Random = Guid.NewGuid().ToString("N").Substring(0, 8);
+        isRandomReadonly = true;
     }
 
     private void ShowModal()

@@ -11,7 +11,7 @@
 
         /// <summary>
         /// Kur bilgisi. 
-        /// Bu özellik, ödeme işleminin gerçekleştirileceği para birimini belirtir. Örneğin, "TRY" (Türk Lirası), "USD" (Amerikan Doları) gibi değerler alabilir.
+        /// Bu özellik, ödeme işleminin gerçekleştirileceği para birimini belirtir. Örneğin, "949" (Türk Lirası), "840 " (Amerikan Doları) gibi değerler alabilir.
         /// Varsayılan değer olarak <c>null</c> olabilir.
         /// </summary>
         public string? Currency { get; set; }
