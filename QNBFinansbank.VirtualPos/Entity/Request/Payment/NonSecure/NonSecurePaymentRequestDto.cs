@@ -1,4 +1,5 @@
-﻿using System.Xml.Serialization;
+﻿using QNBFinansbank.VirtualPos.Entity.Request.Payment.PaymentFacilicator;
+using System.Xml.Serialization;
 
 namespace QNBFinansbank.VirtualPos.Entity.Request.Payment.NonSecure
 {
@@ -112,5 +113,10 @@ namespace QNBFinansbank.VirtualPos.Entity.Request.Payment.NonSecure
         /// </summary>
         [XmlElement(ElementName = "Lang", Namespace = "")]
         public string? Lang { get; set; }
+
+        /// <summary>
+        /// Bu sınıf, ödeme işlemlerinde kullanılacak olan Payment Facilitator verilerini tutar.
+        /// </summary>
+        public PaymentFacilicatorRequestDto? PaymentFacilicator { get; set; }
     }
 }

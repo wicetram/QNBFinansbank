@@ -1,4 +1,5 @@
 ﻿using QNBFinansbank.VirtualPos.Business.Abstract;
+using QNBFinansbank.VirtualPos.Constant;
 using QNBFinansbank.VirtualPos.Entity.Request;
 using QNBFinansbank.VirtualPos.Entity.Request.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
@@ -31,6 +32,18 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Ödeme işlemini gerçekleştirir.
+        /// Bu metot, verilen `PaymentRequestDataDto` nesnesine göre ödeme işlemini başlatır.
+        /// Eğer ödeme işlemi Non-Secure olarak yapılacaksa, `NonSecurePayment` metodunu çağırır; 
+        /// aksi takdirde 3D Secure ödeme işlemi için `ThreeDPayment` metodunu çağırır.
+        /// </summary>
+        /// <param name="startPayment">Ödeme işlemi için gerekli olan parametreleri içeren `PaymentRequestDataDto` nesnesi.</param>
+        /// <returns>
+        /// İşlemin sonucunu ve ilgili bilgileri içeren `PaymentResponseDto` nesnesi.
+        /// Başarılı olması durumunda, `Result` alanı başarılı olarak döner. 
+        /// Başarısız olması durumunda, hata kodu ve mesajı ile birlikte döner.
+        /// </returns>
         public PaymentResponseDto Payment(PaymentRequestDataDto startPayment)
         {
             try
@@ -91,7 +104,13 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     OkUrl = startPayment?.Order?.ReturnUrl,
                     FailUrl = startPayment?.Order?.ReturnUrl,
                     Rnd = startPayment?.Order?.Random,
-                    Hash = hash
+                    Hash = hash,
+
+                    //PF aşaması henüz tamamlanmadığı için kapatıldı.
+                    //PaymentFacilicator = new PaymentFacilicatorRequestDto
+                    //{
+
+                    //}
                 };
 
                 var collection = NameValueCollectionHelper.ToNameValueCollection(dto);
@@ -156,7 +175,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 {
                     return new PaymentResponseDto
                     {
-                        Result = ResponseHandler.GetResult(false, 50000, $"NonSecure ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                        Result = ResponseHandler.GetResult(false, 50000, $"{startPayment?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
                     };
                 }
 
@@ -165,7 +184,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 {
                     return new PaymentResponseDto
                     {
-                        Result = ResponseHandler.GetResult(false, 50000, $"NonSecure ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                        Result = ResponseHandler.GetResult(false, 50000, $"{startPayment?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
                         Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId)
                     };
                 }
@@ -174,14 +193,14 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 {
                     return new PaymentResponseDto
                     {
-                        Result = ResponseHandler.GetResult(false, 50000, $"NonSecure ödeme işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
+                        Result = ResponseHandler.GetResult(false, 50000, $"{startPayment?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
                         Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId)
                     };
                 }
 
                 return new PaymentResponseDto
                 {
-                    Result = ResponseHandler.GetResult(true, 10000, $"NonSecure ödeme işlemi başarılı."),
+                    Result = ResponseHandler.GetResult(true, 10000, $"{startPayment?.Account?.SecureType} ödeme işlemi başarılı."),
                     Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId)
                 };
             }
@@ -189,14 +208,94 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
             {
                 return new PaymentResponseDto
                 {
-                    Result = ResponseHandler.GetResult(false, 50000, $"NonSecure ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
+                    Result = ResponseHandler.GetResult(false, 50000, $"{startPayment?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
             }
         }
 
+        /// <summary>
+        /// İade (Refund) işlemini gerçekleştirir.
+        /// Bu metot, verilen `RefundRequestDataDto` nesnesini kullanarak iade işlemi gerçekleştirir, 
+        /// sonuçları kontrol eder ve yanıtı `RefundResponseDataDto` olarak döner.
+        /// </summary>
+        /// <param name="refund">İade işlemi için gerekli olan parametreleri içeren `RefundRequestDataDto` nesnesi.</param>
+        /// <returns>
+        /// İşlemin sonucunu ve ilgili bilgileri içeren `RefundResponseDataDto` nesnesi.
+        /// Başarılı olması durumunda, `Result` alanı başarılı olarak döner. 
+        /// Başarısız olması durumunda, hata kodu ve mesajı ile birlikte döner.
+        /// </returns>
         public RefundResponseDataDto Refund(RefundRequestDataDto refund)
         {
-            throw new NotImplementedException();
+            try
+            {
+                // İade isteği için gerekli DTO'nun oluşturulması.
+                var dto = new RefundRequestDto
+                {
+                    Currency = refund?.Order?.Currency,
+                    Lang = refund?.Order?.Language,
+                    OrderId = refund?.Order?.OrderId,
+                    PurchAmount = refund?.Order?.Amount,
+
+                    MbrId = refund?.Account?.MbrId,
+                    MerchantID = refund?.Account?.MerchantId,
+                    SecureType = refund?.Account?.SecureType,
+                    TxnType = refund?.Account?.TxnType,
+                    UserCode = refund?.Account?.UserCode,
+                    UserPass = refund?.Account?.UserPass,
+                };
+
+                // DTO'nun XML formatında serileştirilmesi.
+                string body = XmlHelper.SerializeToXml(dto);
+
+                var request = new RestRequest { Method = Method.Post };
+                request.AddHeader("Content-Type", "application/xml");
+                request.AddXmlBody(dto, ContentType.Xml);
+
+                // API'ye gönderilecek olan REST istemcisinin oluşturulması.
+                var client = new RestClient($"{refund?.Account?.BaseUrl}");
+                var response = client.Execute(request);
+
+                // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
+                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                {
+                    return new RefundResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, 50000, $"{refund?.Account?.SecureType} işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                    };
+                }
+
+                // API yanıtının deserialization işlemi.
+                var result = XmlHelper.DeserializeFromXml<RefundResponseDto>(response.Content);
+                if (result == null)
+                {
+                    return new RefundResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, 50000, $"{refund?.Account?.SecureType} işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result.ProcReturnCode != "00")
+                {
+                    return new RefundResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, 50000, $"{refund?.Account?.SecureType} işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
+                    };
+                }
+
+                return new RefundResponseDataDto
+                {
+                    Result = ResponseHandler.GetResult(true, 10000, $"{refund?.Account?.SecureType} işlemi başarılı."),
+                };
+            }
+            catch (Exception ex)
+            {
+                // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
+                return new RefundResponseDataDto
+                {
+                    Result = ResponseHandler.GetResult(false, 50000, $"{refund?.Account?.SecureType} işlemi sırasında tanımsız hata. Hata: {ex.Message}")
+                };
+            }
         }
 
         /// <summary>

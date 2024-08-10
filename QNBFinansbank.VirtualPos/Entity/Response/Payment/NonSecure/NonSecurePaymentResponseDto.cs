@@ -49,5 +49,33 @@ namespace QNBFinansbank.VirtualPos.Entity.Response.Payment.NonSecure
         /// </summary>
         [XmlElement(ElementName = "CardHolderName")]
         public string? CardHolderName { get; set; }
+
+        /// <summary>
+        /// Ekstra taksit sayısı. 
+        /// İşlem sırasında kullanılan ekstra taksit sayısı.
+        /// </summary>
+        [XmlElement(ElementName = "ArtiTaksit")]
+        public string? ArtiTaksit { get; set; }
+
+        /// <summary>
+        /// Bankanın iç yanıt mesajı. 
+        /// Banka tarafından verilen işlemle ilgili ek bilgi içeren mesaj.
+        /// </summary>
+        [XmlElement(ElementName = "BankInternalResponseMessage")]
+        public string? BankInternalResponseMessage { get; set; }
+
+        /// <summary>
+        /// Payfor XML istek verisi. 
+        /// İşlem sırasında kullanılan orijinal XML istek verisi.
+        /// </summary>
+        [XmlElement(ElementName = "PAYFORFROMXMLREQUEST")]
+        public string? PayForFromXMLRequest { get; set; }
+
+        /// <summary>
+        /// Sistem kullanıcı kodu. 
+        /// İşlemi gerçekleştiren sistem kullanıcısının kodu.
+        /// </summary>
+        [XmlElement(ElementName = "SESSION_SYSTEM_USER")]
+        public string? SessionSystemUser { get; set; }
     }
 }

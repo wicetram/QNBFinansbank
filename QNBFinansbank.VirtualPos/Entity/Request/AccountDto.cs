@@ -42,6 +42,8 @@
         /// İşlemin güvenlik seviyesini belirten bir türdür. Olası değerler: 
         /// <c>NonSecure</c> (güvenliksiz), <c>3DPay</c> (3D Secure ödeme), 
         /// <c>3DModel</c> (3D Secure model), <c>3DPayHosting</c> (3D Secure ödeme barındırma).
+        /// <c>Report</c> (Raporlama)
+        /// <c>Inquiry</c> (Sipariş sorgulama)
         /// Varsayılan değer olarak <c>null</c> olabilir.
         /// </summary>
         public string? SecureType { get; set; }
@@ -49,7 +51,7 @@
         /// <summary>
         /// İşlem tipi. 
         /// Bu özellik, gerçekleştirilecek işlem türünü belirtir. Olası değerler:
-        /// <c>Auth</c> (ödeme), <c>Void</c> (iptal), <c>Refund</c> (iade).
+        /// <c>Auth</c> (ödeme), <c>Void</c> (iptal), <c>Refund</c> (iade), <c>PreAuth</c> (ön otorizasyon), <c>PostAuth</c> (ön otorizasyon kapatma)
         /// Varsayılan değer olarak <c>null</c> olabilir.
         /// </summary>
         public string? TxnType { get; set; }
