@@ -1,9 +1,8 @@
-﻿@page "/"
-@page "/payment-form"
+﻿@page "/cancel"
 
 <EditForm Model="@paymentRequestData" OnValidSubmit="HandleValidSubmit">
     <div class="container">
-        <h2 class="mt-4">Payment Request Form</h2>
+        <h2 class="mt-4">Cancel Request Form</h2>
         <div class="card mt-4">
             <div class="card-header">Account Information</div>
             <div class="card-body">
@@ -68,8 +67,7 @@
                 <div class="mb-3">
                     <label for="OrderId" class="form-label">Order Id</label>
                     <div class="input-group">
-                        <InputText id="OrderId" class="form-control" @bind-Value="paymentRequestData.Order.OrderId" readonly="@isOrderIdReadonly" />
-                        <button type="button" class="btn btn-secondary" @onclick="GenerateRandomOrderId">Generate</button>
+                        <InputText id="OrderId" class="form-control" @bind-Value="paymentRequestData.Order.OrderId" />
                     </div>
                 </div>
                 <div class="mb-3">
@@ -81,13 +79,6 @@
                     <InputText id="Language" class="form-control" @bind-Value="paymentRequestData.Order.Language" />
                 </div>
                 <div class="mb-3">
-                    <label for="PaymentSecurity" class="form-label">Payment Security</label>
-                    <InputSelect id="SecureType" class="form-control" @bind-Value="paymentRequestData.Order.PaymentSecurity">
-                        <option value="0">NonSecure</option>
-                        <option value="1" selected="selected">3D</option>
-                    </InputSelect>
-                </div>
-                <div class="mb-3">
                     <label for="Random" class="form-label">Random</label>
                     <div class="input-group">
                         <InputText id="Random" class="form-control" @bind-Value="paymentRequestData.Order.Random" readonly="@isRandomReadonly" />
@@ -97,56 +88,11 @@
             </div>
         </div>
 
-        <div class="card mt-4">
-            <div class="card-header">Card Information</div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label for="CardNo" class="form-label">Card Number</label>
-                    <InputText id="CardNo" class="form-control" @bind-Value="paymentRequestData.Card.CardNo" />
-                </div>
-                <div class="mb-3">
-                    <label for="CardHolderName" class="form-label">Card Holder Name</label>
-                    <InputText id="CardHolderName" class="form-control" @bind-Value="paymentRequestData.Card.CardHolderName" />
-                </div>
-                <div class="mb-3">
-                    <label for="CVC" class="form-label">CVC</label>
-                    <InputText id="CVC" class="form-control" @bind-Value="paymentRequestData.Card.CVC" />
-                </div>
-                <div class="mb-3">
-                    <label for="ExpireDate" class="form-label">Expire Date</label>
-                    <InputText id="ExpireDate" class="form-control" @bind-Value="paymentRequestData.Card.ExpireDate" />
-                </div>
-                <div class="mb-3">
-                    <label for="Email" class="form-label">Email</label>
-                    <InputText id="Email" class="form-control" @bind-Value="paymentRequestData.Card.Email" />
-                </div>
-            </div>
-        </div>
-
-        <div class="card mt-4" style="display:none">
-            <div class="card-header">Submerchant Information</div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label for="SubmerchantId" class="form-label">Submerchant ID</label>
-                    <InputText id="SubmerchantId" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubmerchantId" />
-                </div>
-                <div class="mb-3">
-                    <label for="SubmerchantName" class="form-label">Submerchant Name</label>
-                    <InputText id="SubmerchantName" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubmerchantName" />
-                </div>
-                <div class="mb-3">
-                    <label for="SubmerchantIn" class="form-label">Submerchant URL</label>
-                    <InputText id="SubmerchantIn" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubmerchantIn" />
-                </div>
-                <!-- Diğer SubmerchantDto özellikleri için form elemanları buraya eklenir -->
-            </div>
-        </div>
-
         <button type="submit" class="btn btn-primary mt-4">Submit Payment</button>
     </div>
 </EditForm>
 
-<!-- Başarısız Ödeme Modalı -->
+<!-- Bilgilendirme Modalı -->
 <div class="modal fade @modalClass" tabindex="-1" role="dialog" style="display:@modalDisplay;">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -159,62 +105,39 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
-                @if (!string.IsNullOrEmpty(redirectUrl))
-                {
-                    <button type="button" class="btn btn-success" @onclick="RedirectToPaymentUrl">Redirect</button>
-                }
             </div>
         </div>
     </div>
 </div>
 
 @code {
-    private PaymentRequestDataDto paymentRequestData = new PaymentRequestDataDto
+    private CancelRequestDataDto paymentRequestData = new CancelRequestDataDto
         {
             Account = new AccountDto(),
             Order = new OrderDto(),
-            Card = new CardDto(),
-            Submerchant = new SubmerchantDto()
         };
 
     private string modalClass = "";
     private string modalDisplay = "none";
     private string title = "";
     private string message = "";
-    private string? redirectUrl = "";
 
-    private bool isOrderIdReadonly = false;
     private bool isRandomReadonly = false;
 
     private void HandleValidSubmit()
     {
-        var response = VirtualPos.Payment(paymentRequestData);
+        var response = VirtualPos.Cancel(paymentRequestData);
 
-        if (response != null && response.Result != null && response.Payment != null && response.Result.Result)
+        if (response != null && response.Result != null && response.Result.Result)
         {
-            title = "Ödeme başarılı";
-            redirectUrl = response.Payment.URL; // Ödeme başarılıysa yönlendirme URL'sini al
+            title = "İşlem başarılı";
         }
         else
         {
-            title = "Ödeme başarısız";
+            title = "İşlem başarısız";
         }
         message = response?.Result?.ResultMessage ?? "An unknown error occurred.";
         ShowModal();
-    }
-
-    private void RedirectToPaymentUrl()
-    {
-        if (!string.IsNullOrEmpty(redirectUrl))
-        {
-            Navigation.NavigateTo($"/payment-redirect?htmlContent={Uri.EscapeDataString(redirectUrl)}");
-        }
-    }
-
-    private void GenerateRandomOrderId()
-    {
-        paymentRequestData.Order.OrderId = new Random().Next(1,99999).ToString();
-        isOrderIdReadonly = true;
     }
 
     private void GenerateRandomValue()

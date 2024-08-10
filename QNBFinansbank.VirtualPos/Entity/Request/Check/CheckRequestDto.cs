@@ -1,13 +1,13 @@
 ﻿using System.Xml.Serialization;
 
-namespace QNBFinansbank.VirtualPos.Entity.Request.Refund
+namespace QNBFinansbank.VirtualPos.Entity.Request.Check
 {
     /// <summary>
-    /// İade (Refund) işlemine ait istek parametrelerini temsil eden DTO.
-    /// Bu sınıf, iade işlemi için gerekli olan tüm parametreleri içerir.
+    /// Sipariş Sorgulama (Order Inquiry) işlemine ait istek parametrelerini temsil eden DTO.
+    /// Bu sınıf, sipariş sorgulama işlemi için gerekli olan tüm parametreleri içerir.
     /// </summary>
     [XmlRoot(ElementName = "PayforRequest")]
-    public class RefundRequestDto : IDto
+    public class CheckRequestDto : IDto
     {
         /// <summary>
         /// Kurum kodudur. 
@@ -45,33 +45,18 @@ namespace QNBFinansbank.VirtualPos.Entity.Request.Refund
         public string? OrderId { get; set; }
 
         /// <summary>
-        /// İşlem tutarıdır. 
-        /// 99.50 ya da 99,50 şeklinde olmalıdır. 
-        /// 2 karakter üzerinde gönderilen değerlerde(99,500) işlem vpos sistemi tarafından reddedilecektir.
-        /// </summary>
-        [XmlElement(ElementName = "PurchAmount", Namespace = "")]
-        public string? PurchAmount { get; set; }
-
-        /// <summary>
         /// İşlemin güvenlik türünü belirtir. 
-        /// NonSecure, 3D Secure gibi güvenlik tiplerini belirten maksimum 15 karakter uzunluğunda olan string.
+        /// Inquiry gibi güvenlik tiplerini belirten maksimum 15 karakter uzunluğunda olan string.
         /// </summary>
         [XmlElement(ElementName = "SecureType")]
         public string? SecureType { get; set; }
 
         /// <summary>
         /// İşlem tipi. 
-        /// Örneğin, iade işlemi için "Refund" olarak kullanılır. Maksimum 20 karakter uzunluğunda.
+        /// Örneğin, sipariş sorgulama işlemi için "OrderInquiry" olarak kullanılır. Maksimum 20 karakter uzunluğunda.
         /// </summary>
         [XmlElement(ElementName = "TxnType")]
         public string? TxnType { get; set; }
-
-        /// <summary>
-        /// Kur bilgisi. 
-        /// Döviz kodunu belirtir. Örneğin, TL için "949", USD için "840". 3 karakter uzunluğundadır.
-        /// </summary>
-        [XmlElement(ElementName = "Currency")]
-        public string? Currency { get; set; }
 
         /// <summary>
         /// Kullanıcı dil bilgisi. 

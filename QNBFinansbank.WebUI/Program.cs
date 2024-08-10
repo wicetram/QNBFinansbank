@@ -29,12 +29,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication(); // Eğer varsa önce authentication middleware'ini ekleyin
-app.UseAuthorization();  // Authorization middleware'i
+app.UseAntiforgery();
 
-app.UseAntiforgery(); // Antiforgery middleware'ini ekleyin
+app.MapRazorPages();
 
-app.MapRazorPages(); // Razor Pages için rotayı ekleyin
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

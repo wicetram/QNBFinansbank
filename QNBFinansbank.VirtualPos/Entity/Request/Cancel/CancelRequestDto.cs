@@ -1,13 +1,13 @@
 ﻿using System.Xml.Serialization;
 
-namespace QNBFinansbank.VirtualPos.Entity.Request.Refund
+namespace QNBFinansbank.VirtualPos.Entity.Request.Cancel
 {
     /// <summary>
-    /// İade (Refund) işlemine ait istek parametrelerini temsil eden DTO.
-    /// Bu sınıf, iade işlemi için gerekli olan tüm parametreleri içerir.
+    /// İptal (Cancel) işlemine ait istek parametrelerini temsil eden DTO.
+    /// Bu sınıf, iptal işlemi için gerekli olan tüm parametreleri içerir.
     /// </summary>
     [XmlRoot(ElementName = "PayforRequest")]
-    public class RefundRequestDto : IDto
+    public class CancelRequestDto : IDto
     {
         /// <summary>
         /// Kurum kodudur. 
@@ -45,14 +45,6 @@ namespace QNBFinansbank.VirtualPos.Entity.Request.Refund
         public string? OrderId { get; set; }
 
         /// <summary>
-        /// İşlem tutarıdır. 
-        /// 99.50 ya da 99,50 şeklinde olmalıdır. 
-        /// 2 karakter üzerinde gönderilen değerlerde(99,500) işlem vpos sistemi tarafından reddedilecektir.
-        /// </summary>
-        [XmlElement(ElementName = "PurchAmount", Namespace = "")]
-        public string? PurchAmount { get; set; }
-
-        /// <summary>
         /// İşlemin güvenlik türünü belirtir. 
         /// NonSecure, 3D Secure gibi güvenlik tiplerini belirten maksimum 15 karakter uzunluğunda olan string.
         /// </summary>
@@ -61,7 +53,7 @@ namespace QNBFinansbank.VirtualPos.Entity.Request.Refund
 
         /// <summary>
         /// İşlem tipi. 
-        /// Örneğin, iade işlemi için "Refund" olarak kullanılır. Maksimum 20 karakter uzunluğunda.
+        /// Örneğin, iptal işlemi için "Void" olarak kullanılır. Maksimum 20 karakter uzunluğunda.
         /// </summary>
         [XmlElement(ElementName = "TxnType")]
         public string? TxnType { get; set; }
