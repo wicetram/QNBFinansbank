@@ -18,6 +18,11 @@
         public const string ThreeDModel = "3DModel";
 
         /// <summary>
+        /// 3D Secure model ödeme.
+        /// </summary>
+        public const string ThreeDModelPayment = "3DModelPayment";
+
+        /// <summary>
         /// 3D Secure ödeme barındırma.
         /// </summary>
         public const string ThreeDPayHosting = "3DPayHosting";

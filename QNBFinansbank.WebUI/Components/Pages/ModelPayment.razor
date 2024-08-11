@@ -1,0 +1,112 @@
+﻿@page "/model"
+
+<EditForm Model="@paymentRequestData" OnValidSubmit="HandleValidSubmit">
+    <div class="container">
+        <h2 class="mt-4">3D Model Payment Request Form</h2>
+        <div class="card mt-4">
+            <div class="card-header">Account Information</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="UserCode" class="form-label">User Code</label>
+                    <InputText id="UserCode" class="form-control" @bind-Value="paymentRequestData.UserCode" />
+                </div>
+                <div class="mb-3">
+                    <label for="UserPass" class="form-label">User Pass</label>
+                    <InputText id="UserPass" class="form-control" @bind-Value="paymentRequestData.UserPass" />
+                </div>
+                <div class="mb-3">
+                    <label for="SecureType" class="form-label">Secure Type</label>
+                    <InputSelect id="SecureType" class="form-control" @bind-Value="paymentRequestData.SecureType">
+                        <option value="">Select Secure Type</option>
+                        <option value="NonSecure">NonSecure</option>
+                        <option value="3DPay">3DPay</option>
+                        <option value="3DModel">3DModel</option>
+                        <option value="3DModelPayment">3DModelPayment</option>
+                        <option value="3DPayHosting">3DPayHosting</option>
+                        <option value="Report">Report</option>
+                        <option value="Inquiry">Inquiry</option>
+                    </InputSelect>
+                </div>
+                <div class="mb-3">
+                    <label for="BaseUrl" class="form-label">BaseUrl</label>
+                    <InputText id="BaseUrl" class="form-control" @bind-Value="paymentRequestData.BaseUrl" />
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">Order Information</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="Installment" class="form-label">Order Id</label>
+                    <InputText id="Installment" class="form-control" @bind-Value="paymentRequestData.OrderId" />
+                </div>
+                <div class="mb-3">
+                    <label for="Currency" class="form-label">Request Guid</label>
+                    <InputText id="Currency" class="form-control" @bind-Value="paymentRequestData.RequestGuid" />
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-4">Submit Payment</button>
+    </div>
+</EditForm>
+
+<!-- Bilgilendirme Modalı -->
+<div class="modal fade @modalClass" tabindex="-1" role="dialog" style="display:@modalDisplay;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@title</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <p>@message</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    private ThreeDModelPaymentRequestDto paymentRequestData = new ThreeDModelPaymentRequestDto();
+
+    private string modalClass = "";
+    private string modalDisplay = "none";
+    private string title = "";
+    private string message = "";
+
+    private void HandleValidSubmit()
+    {
+        var response = VirtualPos.ThreeDModelPayment(paymentRequestData);
+
+        if (response != null && response.Result != null && response.Result.Result)
+        {
+            title = "İşlem başarılı";
+        }
+        else
+        {
+            title = "İşlem başarısız";
+        }
+        message = response?.Result?.ResultMessage ?? "An unknown error occurred.";
+        ShowModal();
+    }
+
+    private void ShowModal()
+    {
+        modalClass = "show";
+        modalDisplay = "block";
+        StateHasChanged();
+    }
+
+    private void CloseModal()
+    {
+        modalClass = "";
+        modalDisplay = "none";
+        StateHasChanged();
+    }
+
+}

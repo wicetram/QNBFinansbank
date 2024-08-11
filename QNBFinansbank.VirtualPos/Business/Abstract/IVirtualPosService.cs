@@ -1,10 +1,12 @@
 ﻿using QNBFinansbank.VirtualPos.Entity.Request.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment;
+using QNBFinansbank.VirtualPos.Entity.Request.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Request.Refund;
 using QNBFinansbank.VirtualPos.Entity.Response.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Response.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment;
+using QNBFinansbank.VirtualPos.Entity.Response.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Response.Refund;
 
 namespace QNBFinansbank.VirtualPos.Business.Abstract
@@ -24,6 +26,20 @@ namespace QNBFinansbank.VirtualPos.Business.Abstract
         /// Bu nesne, ödeme işleminin başarı durumunu, işlem sonucunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
         PaymentResponseDto Payment(PaymentRequestDataDto startPayment);
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinde 3D Model ile başlatılan bir ödemeyi tamamlar.
+        /// Bu yöntem, 3D Model ödeme parametrelerini alarak işlemi başlatır ve işleme ilişkin sonucu döner.
+        /// </summary>
+        /// <param name="threeDModel">
+        /// 3D Model Payment işlemini başlatmak için gerekli olan parametreleri içeren bir <see cref="ThreeDModelPaymentRequestDto"/> nesnesi.
+        /// Bu nesne, işlemle ilgili güvenlik bilgileri, sipariş numarası ve diğer ilgili detayları içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu içeren bir <see cref="ThreeDModelPaymentResponseDataDto"/> nesnesi döner.
+        /// Bu nesne, işlem sonucunu, işlemle ilgili hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
+        ThreeDModelPaymentResponseDataDto ThreeDModelPayment(ThreeDModelPaymentRequestDto threeDModel);
 
         /// <summary>
         /// QNB Finansbank Sanal Pos üzerinde bir ödeme işlemini iptal eder.

@@ -1,15 +1,18 @@
 ﻿using QNBFinansbank.VirtualPos.Business.Abstract;
+using QNBFinansbank.VirtualPos.Entity;
 using QNBFinansbank.VirtualPos.Entity.Request;
 using QNBFinansbank.VirtualPos.Entity.Request.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.NonSecure;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.ThreeD;
+using QNBFinansbank.VirtualPos.Entity.Request.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Request.Refund;
 using QNBFinansbank.VirtualPos.Entity.Response.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Response.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment.NonSecure;
+using QNBFinansbank.VirtualPos.Entity.Response.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Response.Refund;
 using QNBFinansbank.VirtualPos.Utility;
 using QNBFinansbank.VirtualPos.Utility.ApiClient;
@@ -175,6 +178,82 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         }
 
         /// <summary>
+        /// İade (Refund) işlemini gerçekleştirir.
+        /// Bu metot, verilen `RefundRequestDataDto` nesnesini kullanarak iade işlemi gerçekleştirir, 
+        /// sonuçları kontrol eder ve yanıtı `RefundResponseDataDto` olarak döner.
+        /// </summary>
+        /// <param name="refund">İade işlemi için gerekli olan parametreleri içeren `RefundRequestDataDto` nesnesi.</param>
+        /// <returns>
+        /// İşlemin sonucunu ve ilgili bilgileri içeren `RefundResponseDataDto` nesnesi.
+        /// Başarılı olması durumunda, `Result` alanı başarılı olarak döner. 
+        /// Başarısız olması durumunda, hata kodu ve mesajı ile birlikte döner.
+        /// </returns>
+        public RefundResponseDataDto Refund(RefundRequestDataDto refund)
+        {
+            try
+            {
+                // İade isteği için gerekli DTO'nun oluşturulması.
+                var dto = new RefundRequestDto
+                {
+                    Currency = refund?.Order?.Currency,
+                    Lang = refund?.Order?.Language,
+                    OrderId = refund?.Order?.OrderId,
+                    PurchAmount = refund?.Order?.Amount,
+
+                    MbrId = refund?.Account?.MbrId,
+                    MerchantID = refund?.Account?.MerchantId,
+                    SecureType = refund?.Account?.SecureType,
+                    TxnType = refund?.Account?.TxnType,
+                    UserCode = refund?.Account?.UserCode,
+                    UserPass = refund?.Account?.UserPass,
+                };
+
+                var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, refund?.Account?.BaseUrl);
+
+                // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
+                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                {
+                    return new RefundResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, 50000, $"{refund?.Account?.TxnType} işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                    };
+                }
+
+                // API yanıtının deserialization işlemi.
+                var result = XmlHelper.DeserializeFromXml<RefundResponseDto>(response.Content);
+                if (result == null)
+                {
+                    return new RefundResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, 50000, $"{refund?.Account?.TxnType} işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result.ProcReturnCode != "00")
+                {
+                    return new RefundResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, 50000, $"{refund?.Account?.TxnType} işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
+                    };
+                }
+
+                return new RefundResponseDataDto
+                {
+                    Result = ResponseHandler.GetResult(true, 10000, $"{refund?.Account?.TxnType} işlemi başarılı."),
+                };
+            }
+            catch (Exception ex)
+            {
+                // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
+                return new RefundResponseDataDto
+                {
+                    Result = ResponseHandler.GetResult(false, 50000, $"{refund?.Account?.TxnType} işlemi sırasında tanımsız hata. Hata: {ex.Message}")
+                };
+            }
+        }
+
+        /// <summary>
         /// Ödeme işlemini gerçekleştirir.
         /// Bu metot, verilen `PaymentRequestDataDto` nesnesine göre ödeme işlemini başlatır.
         /// Eğer ödeme işlemi Non-Secure olarak yapılacaksa, `NonSecurePayment` metodunu çağırır; 
@@ -201,75 +280,6 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 return new PaymentResponseDto
                 {
                     Result = ResponseHandler.GetResult(false, 50000, $"İşlem sırasında tanımsız hata. Hata: {ex.Message}")
-                };
-            }
-        }
-
-        /// <summary>
-        /// 3D ödeme işlemini gerçekleştirir.
-        /// </summary>
-        /// <param name="startPayment">Ödeme işlemi için gerekli olan tüm bilgileri içeren DTO nesnesi.</param>
-        /// <returns>Ödeme işleminin sonucunu temsil eden <see cref="PaymentResponseDto"/> nesnesi.</returns>
-        private static PaymentResponseDto ThreeDPayment(PaymentRequestDataDto? startPayment)
-        {
-            try
-            {
-                string hash = PaymentHashHelper(startPayment?.Account, startPayment?.Order);
-                if (string.IsNullOrEmpty(hash))
-                {
-                    return new PaymentResponseDto
-                    {
-                        Result = ResponseHandler.GetResult(false, 50000, $"{startPayment?.Account?.SecureType} ödeme işlemi başlatılmak istenmiştir, ancak hash değeri oluşturulamadığı için ödeme başlatılamamıştır.")
-                    };
-                }
-
-                var dto = new ThreeDPaymentRequestDto
-                {
-                    Currency = startPayment?.Order?.Currency,
-                    Lang = startPayment?.Order?.Language,
-                    OrderId = startPayment?.Order?.OrderId,
-                    PurchAmount = startPayment?.Order?.Amount,
-                    InstallmentCount = startPayment?.Order?.Installment == "1" ? "0" : startPayment?.Order?.Installment,
-
-                    MbrId = startPayment?.Account?.MbrId,
-                    MerchantID = startPayment?.Account?.MerchantId,
-                    UserCode = startPayment?.Account?.UserCode,
-                    UserPass = startPayment?.Account?.UserPass,
-
-                    SecureType = startPayment?.Account?.SecureType,
-                    TxnType = startPayment?.Account?.TxnType,
-
-                    Pan = startPayment?.Card?.CardNo,
-                    Cvv2 = startPayment?.Card?.CVC,
-                    Expiry = startPayment?.Card?.ExpireDate,
-
-                    OkUrl = startPayment?.Order?.ReturnUrl,
-                    FailUrl = startPayment?.Order?.ReturnUrl,
-                    Rnd = startPayment?.Order?.Random,
-                    Hash = hash,
-
-                    //PF aşaması henüz tamamlanmadığı için kapatıldı.
-                    //PaymentFacilicator = new PaymentFacilicatorRequestDto
-                    //{
-
-                    //}
-                };
-
-                var collection = NameValueCollectionHelper.ToNameValueCollection(dto);
-
-                string html = NameValueCollectionHelper.GenerateHtmlForm(collection, startPayment?.Account?.BaseUrl);
-
-                return new PaymentResponseDto
-                {
-                    Result = ResponseHandler.GetResult(true, 10000, $"{startPayment?.Account?.SecureType} ödeme işlemi başarılı."),
-                    Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId, html)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new PaymentResponseDto
-                {
-                    Result = ResponseHandler.GetResult(false, 50000, $"{startPayment?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
             }
         }
@@ -349,77 +359,127 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         }
 
         /// <summary>
-        /// İade (Refund) işlemini gerçekleştirir.
-        /// Bu metot, verilen `RefundRequestDataDto` nesnesini kullanarak iade işlemi gerçekleştirir, 
-        /// sonuçları kontrol eder ve yanıtı `RefundResponseDataDto` olarak döner.
+        /// 3D ödeme işlemini gerçekleştirir.
         /// </summary>
-        /// <param name="refund">İade işlemi için gerekli olan parametreleri içeren `RefundRequestDataDto` nesnesi.</param>
-        /// <returns>
-        /// İşlemin sonucunu ve ilgili bilgileri içeren `RefundResponseDataDto` nesnesi.
-        /// Başarılı olması durumunda, `Result` alanı başarılı olarak döner. 
-        /// Başarısız olması durumunda, hata kodu ve mesajı ile birlikte döner.
-        /// </returns>
-        public RefundResponseDataDto Refund(RefundRequestDataDto refund)
+        /// <param name="startPayment">Ödeme işlemi için gerekli olan tüm bilgileri içeren DTO nesnesi.</param>
+        /// <returns>Ödeme işleminin sonucunu temsil eden <see cref="PaymentResponseDto"/> nesnesi.</returns>
+        private static PaymentResponseDto ThreeDPayment(PaymentRequestDataDto? startPayment)
         {
             try
             {
-                // İade isteği için gerekli DTO'nun oluşturulması.
-                var dto = new RefundRequestDto
+                string hash = PaymentHashHelper(startPayment?.Account, startPayment?.Order);
+                if (string.IsNullOrEmpty(hash))
                 {
-                    Currency = refund?.Order?.Currency,
-                    Lang = refund?.Order?.Language,
-                    OrderId = refund?.Order?.OrderId,
-                    PurchAmount = refund?.Order?.Amount,
+                    return new PaymentResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, 50000, $"{startPayment?.Account?.SecureType} ödeme işlemi başlatılmak istenmiştir, ancak hash değeri oluşturulamadığı için ödeme başlatılamamıştır.")
+                    };
+                }
 
-                    MbrId = refund?.Account?.MbrId,
-                    MerchantID = refund?.Account?.MerchantId,
-                    SecureType = refund?.Account?.SecureType,
-                    TxnType = refund?.Account?.TxnType,
-                    UserCode = refund?.Account?.UserCode,
-                    UserPass = refund?.Account?.UserPass,
+                var dto = new ThreeDPaymentRequestDto
+                {
+                    Currency = startPayment?.Order?.Currency,
+                    Lang = startPayment?.Order?.Language,
+                    OrderId = startPayment?.Order?.OrderId,
+                    PurchAmount = startPayment?.Order?.Amount,
+                    InstallmentCount = startPayment?.Order?.Installment == "1" ? "0" : startPayment?.Order?.Installment,
+
+                    MbrId = startPayment?.Account?.MbrId,
+                    MerchantID = startPayment?.Account?.MerchantId,
+                    UserCode = startPayment?.Account?.UserCode,
+                    UserPass = startPayment?.Account?.UserPass,
+
+                    SecureType = startPayment?.Account?.SecureType,
+                    TxnType = startPayment?.Account?.TxnType,
+
+                    Pan = startPayment?.Card?.CardNo,
+                    Cvv2 = startPayment?.Card?.CVC,
+                    Expiry = startPayment?.Card?.ExpireDate,
+
+                    OkUrl = startPayment?.Order?.ReturnUrl,
+                    FailUrl = startPayment?.Order?.ReturnUrl,
+                    Rnd = startPayment?.Order?.Random,
+                    Hash = hash,
+
+                    //PF aşaması henüz tamamlanmadığı için kapatıldı.
+                    //PaymentFacilicator = new PaymentFacilicatorRequestDto
+                    //{
+
+                    //}
                 };
 
-                var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, refund?.Account?.BaseUrl);
+                var collection = NameValueCollectionHelper.ToNameValueCollection(dto);
 
-                // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
+                string html = NameValueCollectionHelper.GenerateHtmlForm(collection, startPayment?.Account?.BaseUrl);
+
+                return new PaymentResponseDto
+                {
+                    Result = ResponseHandler.GetResult(true, 10000, $"{startPayment?.Account?.SecureType} ödeme işlemi başarılı."),
+                    Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId, html)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new PaymentResponseDto
+                {
+                    Result = ResponseHandler.GetResult(false, 50000, $"{startPayment?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
+                };
+            }
+        }
+
+        /// <summary>
+        /// 3D Model ödeme işlemini gerçekleştiren metottur. 
+        /// Gönderilen ödeme talebiyle bir POST isteği yapar ve yanıtı DTO formatında döndürür.
+        /// </summary>
+        /// <param name="threeDModel">3D Model ödeme isteğini temsil eden DTO. Kullanıcı bilgilerini, sipariş numarasını ve diğer gerekli bilgileri içerir.</param>
+        /// <returns>
+        /// 3D Model ödeme işleminin sonucunu ve ilgili yanıt verilerini içeren bir <see cref="ThreeDModelPaymentResponseDataDto"/> nesnesi döner.
+        /// İşlem başarılıysa, <see cref="ThreeDModelPaymentResponseDto"/> nesnesi doldurulmuş olarak döner.
+        /// İşlem başarısızsa veya bir hata oluşursa, ilgili hata mesajını içeren bir sonuç döner.
+        /// </returns>
+        /// <remarks>
+        /// Bu metot, ödeme isteği için bir HTTP POST isteği yapar ve yanıtın içeriğini analiz eder.
+        /// Yanıt başarılı değilse, hata detayı içeren bir sonuç döner.
+        /// Yanıt başarılıysa, yanıt string'ini DTO'ya parse eder ve sonuç olarak döndürür.
+        /// Eğer metot sırasında bir hata oluşursa, hata mesajını içeren bir sonuç döner.
+        /// </remarks>
+        public ThreeDModelPaymentResponseDataDto ThreeDModelPayment(ThreeDModelPaymentRequestDto threeDModel)
+        {
+            try
+            {
+                var request = new RestRequest { Method = Method.Post };
+                request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+                request.AddParameter("UserCode", threeDModel.UserCode);
+                request.AddParameter("UserPass", threeDModel.UserPass);
+                request.AddParameter("OrderId", threeDModel.OrderId);
+                request.AddParameter("SecureType", threeDModel.SecureType);
+                request.AddParameter("RequestGuid", threeDModel.RequestGuid);
+
+                var client = new RestClient($"{threeDModel?.BaseUrl}");
+                var response = client.Execute(request);
+
                 if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
                 {
-                    return new RefundResponseDataDto
+                    return new ThreeDModelPaymentResponseDataDto
                     {
-                        Result = ResponseHandler.GetResult(false, 50000, $"{refund?.Account?.TxnType} işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                        Result = ResponseHandler.GetResult(false, 50000, $"3D Model ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
                     };
                 }
 
-                // API yanıtının deserialization işlemi.
-                var result = XmlHelper.DeserializeFromXml<RefundResponseDto>(response.Content);
-                if (result == null)
-                {
-                    return new RefundResponseDataDto
-                    {
-                        Result = ResponseHandler.GetResult(false, 50000, $"{refund?.Account?.TxnType} işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
-                    };
-                }
+                var result = ResponseParser.ParseResponseToDto<ThreeDModelPaymentResponseDto>(response.Content);
 
-                // İşlemin başarı koduna göre sonuç döndürülmesi.
-                if (result.ProcReturnCode != "00")
+                return new ThreeDModelPaymentResponseDataDto
                 {
-                    return new RefundResponseDataDto
-                    {
-                        Result = ResponseHandler.GetResult(false, 50000, $"{refund?.Account?.TxnType} işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
-                    };
-                }
-
-                return new RefundResponseDataDto
-                {
-                    Result = ResponseHandler.GetResult(true, 10000, $"{refund?.Account?.TxnType} işlemi başarılı."),
+                    Result = ResponseHandler.GetResult(true, 10000, "3D Model ödeme işlemi başarılı."),
+                    ThreeDModelPayment = result
                 };
             }
             catch (Exception ex)
             {
                 // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
-                return new RefundResponseDataDto
+                return new ThreeDModelPaymentResponseDataDto
                 {
-                    Result = ResponseHandler.GetResult(false, 50000, $"{refund?.Account?.TxnType} işlemi sırasında tanımsız hata. Hata: {ex.Message}")
+                    Result = ResponseHandler.GetResult(false, 50000, $"3D Model ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
             }
         }
