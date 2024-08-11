@@ -2,11 +2,13 @@
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.ThreeD.ModelPayment;
+using QNBFinansbank.VirtualPos.Entity.Request.PreAuth;
 using QNBFinansbank.VirtualPos.Entity.Request.Refund;
 using QNBFinansbank.VirtualPos.Entity.Response.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Response.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment.ThreeD.ModelPayment;
+using QNBFinansbank.VirtualPos.Entity.Response.PreAuth;
 using QNBFinansbank.VirtualPos.Entity.Response.Refund;
 
 namespace QNBFinansbank.VirtualPos.Business.Abstract
@@ -40,6 +42,20 @@ namespace QNBFinansbank.VirtualPos.Business.Abstract
         /// Bu nesne, işlem sonucunu, işlemle ilgili hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
         ThreeDModelPaymentResponseDataDto ThreeDModelPayment(ThreeDModelPaymentRequestDto threeDModel);
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinde başlatılmış bir ön otorizasyon (Pre-Auth) işlemini sonlandırır.
+        /// Bu yöntem, ön otorizasyon talebini alarak işlemi sonlandırır ve işlem sonucunu döner.
+        /// </summary>
+        /// <param name="preAuthRequest">
+        /// Ön otorizasyon işlemini sonlandırmak için gerekli olan parametreleri içeren bir <see cref="PreAuthRequestDataDto"/> nesnesi.
+        /// Bu nesne, sonlandırılacak işlemle ilgili detayları içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu içeren bir <see cref="PreAuthResponseDataDto"/> nesnesi döner. 
+        /// Bu nesne, ön otorizasyon işleminin sonlandırılmasının başarı durumunu, işlem sonucunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
+        PreAuthResponseDataDto StopPreAuth(PreAuthRequestDataDto preAuthRequest);
 
         /// <summary>
         /// QNB Finansbank Sanal Pos üzerinde bir ödeme işlemini iptal eder.
