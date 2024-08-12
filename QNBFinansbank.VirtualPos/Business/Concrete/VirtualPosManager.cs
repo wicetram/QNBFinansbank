@@ -13,6 +13,7 @@ using QNBFinansbank.VirtualPos.Entity.Request.PreAuth;
 using QNBFinansbank.VirtualPos.Entity.Request.Refund;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Usage;
+using QNBFinansbank.VirtualPos.Entity.Request.SegmentInquiry;
 using QNBFinansbank.VirtualPos.Entity.Response.BatchClose;
 using QNBFinansbank.VirtualPos.Entity.Response.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Response.Check;
@@ -24,6 +25,7 @@ using QNBFinansbank.VirtualPos.Entity.Response.PreAuth;
 using QNBFinansbank.VirtualPos.Entity.Response.Refund;
 using QNBFinansbank.VirtualPos.Entity.Response.RewardPoints.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.RewardPoints.Usage;
+using QNBFinansbank.VirtualPos.Entity.Response.SegmentInquiry;
 using QNBFinansbank.VirtualPos.Utility;
 using QNBFinansbank.VirtualPos.Utility.ApiClient;
 using QNBFinansbank.VirtualPos.Utility.Cryptography;
@@ -749,6 +751,83 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 return new BatchCloseResponseDataDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{batchCloseRequestData?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
+                };
+            }
+        }
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinde segment sorgulama işlemi gerçekleştirir.
+        /// Bu yöntem, segment sorgulama parametrelerini alarak işlem sonucunu döner.
+        /// </summary>
+        /// <param name="segmentInquiryRequestDto">
+        /// Segment sorgulama işlemi için gerekli olan parametreleri içeren bir <see cref="SegmentInquiryRequestDataDto"/> nesnesi.
+        /// Bu nesne, sorgulama işlemiyle ilgili hesap, sipariş ve kart bilgilerini içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu içeren bir <see cref="SegmentInquiryResponseDataDto"/> nesnesi döner.
+        /// Bu nesne, segment sorgulama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
+        public SegmentInquiryResponseDataDto SegmentInquiry(SegmentInquiryRequestDataDto segmentInquiryRequestDto)
+        {
+            try
+            {
+                // Segment sorgulama isteği için gerekli DTO'nun oluşturulması.
+                var dto = new SegmentInquiryRequestDto
+                {
+                    MbrId = segmentInquiryRequestDto?.Account?.MbrId,
+                    MerchantID = segmentInquiryRequestDto?.Account?.MerchantId,
+                    UserCode = segmentInquiryRequestDto?.Account?.UserCode,
+                    UserPass = segmentInquiryRequestDto?.Account?.UserPass,
+                    SecureType = segmentInquiryRequestDto?.Account?.SecureType,
+                    TxnType = segmentInquiryRequestDto?.Account?.TxnType,
+                    Lang = segmentInquiryRequestDto?.Order?.Language,
+                    Pan = segmentInquiryRequestDto?.Card?.CardNo,
+                    Expiry = segmentInquiryRequestDto?.Card?.ExpireDate
+                };
+
+                var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, segmentInquiryRequestDto?.Account?.BaseUrl);
+
+                // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
+                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                {
+                    return new SegmentInquiryResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{segmentInquiryRequestDto?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                    };
+                }
+
+                // API yanıtının deserialization işlemi.
+                var result = XmlHelper.DeserializeFromXml<SegmentInquiryResponseDto>(response.Content);
+                if (result == null)
+                {
+                    return new SegmentInquiryResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{segmentInquiryRequestDto?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result?.ProcReturnCode != Results.Approved)
+                {
+                    return new SegmentInquiryResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{segmentInquiryRequestDto?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result?.ProcReturnCode} | Hata Mesajı: {result?.ErrMsg}"),
+                        SegmentInquiryResponse = result
+                    };
+                }
+
+                return new SegmentInquiryResponseDataDto
+                {
+                    Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{segmentInquiryRequestDto?.Account?.SecureType} ödeme işlemi başarılı."),
+                    SegmentInquiryResponse = result
+                };
+            }
+            catch (Exception ex)
+            {
+                // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
+                return new SegmentInquiryResponseDataDto
+                {
+                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{segmentInquiryRequestDto?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
             }
         }

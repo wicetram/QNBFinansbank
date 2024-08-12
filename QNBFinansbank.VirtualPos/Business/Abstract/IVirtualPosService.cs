@@ -8,6 +8,7 @@ using QNBFinansbank.VirtualPos.Entity.Request.PreAuth;
 using QNBFinansbank.VirtualPos.Entity.Request.Refund;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Usage;
+using QNBFinansbank.VirtualPos.Entity.Request.SegmentInquiry;
 using QNBFinansbank.VirtualPos.Entity.Response.BatchClose;
 using QNBFinansbank.VirtualPos.Entity.Response.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Response.Check;
@@ -18,6 +19,7 @@ using QNBFinansbank.VirtualPos.Entity.Response.PreAuth;
 using QNBFinansbank.VirtualPos.Entity.Response.Refund;
 using QNBFinansbank.VirtualPos.Entity.Response.RewardPoints.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.RewardPoints.Usage;
+using QNBFinansbank.VirtualPos.Entity.Response.SegmentInquiry;
 
 namespace QNBFinansbank.VirtualPos.Business.Abstract
 {
@@ -163,5 +165,6 @@ namespace QNBFinansbank.VirtualPos.Business.Abstract
         /// </returns>
         BatchCloseResponseDataDto BatchClose(BatchCloseRequestDataDto batchCloseRequestDto);
 
+        SegmentInquiryResponseDataDto SegmentInquiry(SegmentInquiryRequestDataDto segmentInquiryRequestDto);
     }
 }
