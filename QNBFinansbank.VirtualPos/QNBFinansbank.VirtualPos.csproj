@@ -13,11 +13,7 @@
   <ItemGroup>
     <Folder Include="Entity\Request\Campaign\Check\" />
     <Folder Include="Entity\Request\Campaign\Usage\" />
-    <Folder Include="Entity\Request\LinkPay\" />
-    <Folder Include="Entity\Request\EOD\" />
     <Folder Include="Entity\Response\Campaign\" />
-    <Folder Include="Entity\Response\LinkPay\" />
-    <Folder Include="Entity\Response\EOD\" />
   </ItemGroup>
 
 </Project>
