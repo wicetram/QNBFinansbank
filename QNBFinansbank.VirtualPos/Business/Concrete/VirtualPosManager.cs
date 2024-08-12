@@ -1,6 +1,7 @@
 ﻿using QNBFinansbank.VirtualPos.Business.Abstract;
 using QNBFinansbank.VirtualPos.Constant;
 using QNBFinansbank.VirtualPos.Entity.Request;
+using QNBFinansbank.VirtualPos.Entity.Request.BatchClose;
 using QNBFinansbank.VirtualPos.Entity.Request.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.History;
@@ -12,6 +13,7 @@ using QNBFinansbank.VirtualPos.Entity.Request.PreAuth;
 using QNBFinansbank.VirtualPos.Entity.Request.Refund;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Usage;
+using QNBFinansbank.VirtualPos.Entity.Response.BatchClose;
 using QNBFinansbank.VirtualPos.Entity.Response.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Response.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.History;
@@ -671,6 +673,82 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 return new HistoryResponseDataDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
+                };
+            }
+        }
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinden toplu kapama (batch close) işlemini gerçekleştirir.
+        /// Bu yöntem, toplu kapama parametrelerini alarak işlem sonucunu döner.
+        /// </summary>
+        /// <param name="batchCloseRequestData">
+        /// Toplu kapama işlemi için gerekli olan parametreleri içeren bir <see cref="BatchCloseRequestDataDto"/> nesnesi.
+        /// Bu nesne, hesap ve işlemle ilgili bilgileri içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu içeren bir <see cref="BatchCloseResponseDataDto"/> nesnesi döner.
+        /// Bu nesne, toplu kapama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
+        public BatchCloseResponseDataDto BatchClose(BatchCloseRequestDataDto batchCloseRequestData)
+        {
+            try
+            {
+                // Toplu kapama isteği için gerekli DTO'nun oluşturulması.
+                var dto = new BatchCloseRequestDto
+                {
+                    MbrId = batchCloseRequestData?.Account?.MbrId,
+                    MerchantID = batchCloseRequestData?.Account?.MerchantId,
+                    UserCode = batchCloseRequestData?.Account?.UserCode,
+                    UserPass = batchCloseRequestData?.Account?.UserPass,
+                    SecureType = batchCloseRequestData?.Account?.SecureType,
+                    TxnType = batchCloseRequestData?.Account?.TxnType,
+                    Currency = batchCloseRequestData?.Order?.Currency,
+                    Lang = batchCloseRequestData?.Order?.Language
+                };
+
+                var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, batchCloseRequestData?.Account?.BaseUrl);
+
+                // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
+                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                {
+                    return new BatchCloseResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{batchCloseRequestData?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                    };
+                }
+
+                // API yanıtının deserialization işlemi.
+                var result = XmlHelper.DeserializeFromXml<BatchCloseResponseDto>(response.Content);
+                if (result == null)
+                {
+                    return new BatchCloseResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{batchCloseRequestData?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result?.ProcReturnCode != Results.Approved)
+                {
+                    return new BatchCloseResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{batchCloseRequestData?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result?.ProcReturnCode} | Hata Mesajı: {result?.ErrMsg}"),
+                        BatchClose = result
+                    };
+                }
+
+                return new BatchCloseResponseDataDto
+                {
+                    Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{batchCloseRequestData?.Account?.SecureType} ödeme işlemi başarılı."),
+                    BatchClose = result
+                };
+            }
+            catch (Exception ex)
+            {
+                // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
+                return new BatchCloseResponseDataDto
+                {
+                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{batchCloseRequestData?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
             }
         }

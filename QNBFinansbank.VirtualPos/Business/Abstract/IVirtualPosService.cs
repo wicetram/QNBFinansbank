@@ -1,4 +1,5 @@
-﻿using QNBFinansbank.VirtualPos.Entity.Request.Cancel;
+﻿using QNBFinansbank.VirtualPos.Entity.Request.BatchClose;
+using QNBFinansbank.VirtualPos.Entity.Request.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.History;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment;
@@ -7,6 +8,7 @@ using QNBFinansbank.VirtualPos.Entity.Request.PreAuth;
 using QNBFinansbank.VirtualPos.Entity.Request.Refund;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Usage;
+using QNBFinansbank.VirtualPos.Entity.Response.BatchClose;
 using QNBFinansbank.VirtualPos.Entity.Response.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Response.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.History;
@@ -146,5 +148,20 @@ namespace QNBFinansbank.VirtualPos.Business.Abstract
         /// Bu nesne, işlem geçmişi sorgulama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
         HistoryResponseDataDto History(HistoryRequestDataDto historyRequestDataDto);
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinde toplu kapama (batch close) işlemini gerçekleştirir.
+        /// Bu yöntem, toplu kapama parametrelerini alarak işlem sonucunu döner.
+        /// </summary>
+        /// <param name="batchCloseRequestDto">
+        /// Toplu kapama işlemi için gerekli olan parametreleri içeren bir <see cref="BatchCloseRequestDataDto"/> nesnesi.
+        /// Bu nesne, işlemle ilgili hesap bilgilerini içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu içeren bir <see cref="BatchCloseResponseDataDto"/> nesnesi döner.
+        /// Bu nesne, toplu kapama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
+        BatchCloseResponseDataDto BatchClose(BatchCloseRequestDataDto batchCloseRequestDto);
+
     }
 }

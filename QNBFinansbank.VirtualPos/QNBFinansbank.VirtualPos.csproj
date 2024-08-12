@@ -10,4 +10,16 @@
     <PackageReference Include="RestSharp" Version="111.4.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Entity\Request\Campaign\Check\" />
+    <Folder Include="Entity\Request\Campaign\Usage\" />
+    <Folder Include="Entity\Request\LinkPay\" />
+    <Folder Include="Entity\Request\EOD\" />
+    <Folder Include="Entity\Request\SegmentInquiry\" />
+    <Folder Include="Entity\Response\Campaign\" />
+    <Folder Include="Entity\Response\LinkPay\" />
+    <Folder Include="Entity\Response\EOD\" />
+    <Folder Include="Entity\Response\SegmentInquiry\" />
+  </ItemGroup>
+
 </Project>
