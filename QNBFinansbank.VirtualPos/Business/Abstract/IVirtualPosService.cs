@@ -4,12 +4,16 @@ using QNBFinansbank.VirtualPos.Entity.Request.Payment;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Request.PreAuth;
 using QNBFinansbank.VirtualPos.Entity.Request.Refund;
+using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Check;
+using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Usage;
 using QNBFinansbank.VirtualPos.Entity.Response.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Response.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Response.PreAuth;
 using QNBFinansbank.VirtualPos.Entity.Response.Refund;
+using QNBFinansbank.VirtualPos.Entity.Response.RewardPoints.Check;
+using QNBFinansbank.VirtualPos.Entity.Response.RewardPoints.Usage;
 
 namespace QNBFinansbank.VirtualPos.Business.Abstract
 {
@@ -98,5 +102,33 @@ namespace QNBFinansbank.VirtualPos.Business.Abstract
         /// Bu nesne, işlem durumunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
         CheckResponseDataDto Check(CheckRequestDataDto check);
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinden para puanları sorgular.
+        /// Bu yöntem, para puan sorgulama parametrelerini alarak işlem sonucunu döner.
+        /// </summary>
+        /// <param name="rewardPointsRequestDto">
+        /// Para puan sorgulama işlemi için gerekli olan parametreleri içeren bir <see cref="CheckRewardPointsRequestDataDto"/> nesnesi.
+        /// Bu nesne, sorgulama işlemiyle ilgili hesap, sipariş ve kart bilgilerini içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu içeren bir <see cref="CheckRewardPointsResponseDataDto"/> nesnesi döner.
+        /// Bu nesne, para puan sorgulama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
+        CheckRewardPointsResponseDataDto CheckRewardPoints(CheckRewardPointsRequestDataDto rewardPointsRequestDto);
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinden para puanları kullanarak ödeme yapar.
+        /// Bu yöntem, para puan kullanım parametrelerini alarak işlem sonucunu döner.
+        /// </summary>
+        /// <param name="useRewardPointsRequestDto">
+        /// Para puan kullanım işlemi için gerekli olan parametreleri içeren bir <see cref="UseRewardPointsRequestDataDto"/> nesnesi.
+        /// Bu nesne, işlemle ilgili hesap, sipariş ve kart bilgilerini içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu içeren bir <see cref="UseRewardPointsResponseDataDto"/> nesnesi döner.
+        /// Bu nesne, para puan kullanım işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
+        UseRewardPointsResponseDataDto UseRewardPoints(UseRewardPointsRequestDataDto useRewardPointsRequestDto);
     }
 }

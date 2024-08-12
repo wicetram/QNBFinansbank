@@ -9,6 +9,8 @@ using QNBFinansbank.VirtualPos.Entity.Request.Payment.ThreeD;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Request.PreAuth;
 using QNBFinansbank.VirtualPos.Entity.Request.Refund;
+using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Check;
+using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Usage;
 using QNBFinansbank.VirtualPos.Entity.Response.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Response.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment;
@@ -16,6 +18,8 @@ using QNBFinansbank.VirtualPos.Entity.Response.Payment.NonSecure;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Response.PreAuth;
 using QNBFinansbank.VirtualPos.Entity.Response.Refund;
+using QNBFinansbank.VirtualPos.Entity.Response.RewardPoints.Check;
+using QNBFinansbank.VirtualPos.Entity.Response.RewardPoints.Usage;
 using QNBFinansbank.VirtualPos.Utility;
 using QNBFinansbank.VirtualPos.Utility.ApiClient;
 using QNBFinansbank.VirtualPos.Utility.Cryptography;
@@ -579,6 +583,161 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 return new PreAuthResponseDataDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{preAuthRequest?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
+                };
+            }
+        }
+
+        /// <summary>
+        /// Para puan sorgulama işlemini gerçekleştirir.
+        /// </summary>
+        /// <param name="rewardPointsRequestDto">Para puan sorgulama işlemi için gerekli olan tüm bilgileri içeren DTO nesnesi.</param>
+        /// <returns>
+        /// İşlemin sonucunu ve ilgili bilgileri içeren <see cref="CheckRewardPointsResponseDataDto"/> nesnesi.
+        /// Başarılı olması durumunda, <see cref="CheckRewardPointsResponseDataDto.Result"/> alanı başarılı olarak döner.
+        /// Başarısız olması durumunda, hata kodu ve mesajı ile birlikte döner.
+        /// </returns>
+        public CheckRewardPointsResponseDataDto CheckRewardPoints(CheckRewardPointsRequestDataDto rewardPointsRequestDto)
+        {
+            try
+            {
+                // Para puan sorgulama isteği için gerekli DTO'nun oluşturulması.
+                var dto = new CheckRewardPointsRequestDto
+                {
+                    Currency = rewardPointsRequestDto?.Order?.Currency,
+                    Lang = rewardPointsRequestDto?.Order?.Language,
+                    OrderId = rewardPointsRequestDto?.Order?.OrderId,
+                    Pan = rewardPointsRequestDto?.Card?.CardNo,
+                    MbrId = rewardPointsRequestDto?.Account?.MbrId,
+                    MerchantID = rewardPointsRequestDto?.Account?.MerchantId,
+                    UserCode = rewardPointsRequestDto?.Account?.UserCode,
+                    UserPass = rewardPointsRequestDto?.Account?.UserPass,
+                    SecureType = rewardPointsRequestDto?.Account?.SecureType,
+                    TxnType = rewardPointsRequestDto?.Account?.TxnType,
+                };
+
+                var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, rewardPointsRequestDto?.Account?.BaseUrl);
+
+                // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
+                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                {
+                    return new CheckRewardPointsResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{rewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                    };
+                }
+
+                // API yanıtının deserialization işlemi.
+                var result = XmlHelper.DeserializeFromXml<CheckRewardPointsResponseDto>(response.Content);
+                if (result == null)
+                {
+                    return new CheckRewardPointsResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{rewardPointsRequestDto?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result.ProcReturnCode != Results.Approved)
+                {
+                    return new CheckRewardPointsResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{rewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
+                        Rewards = result
+                    };
+                }
+
+                return new CheckRewardPointsResponseDataDto
+                {
+                    Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{rewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarılı."),
+                    Rewards = result
+                };
+            }
+            catch (Exception ex)
+            {
+                // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
+                return new CheckRewardPointsResponseDataDto
+                {
+                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{rewardPointsRequestDto?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
+                };
+            }
+        }
+
+        /// <summary>
+        /// Para puan kullanımı ile ödeme işlemi gerçekleştirir.
+        /// </summary>
+        /// <param name="useRewardPointsRequestDto">Para puan kullanımı için gerekli olan tüm bilgileri içeren DTO nesnesi.</param>
+        /// <returns>
+        /// İşlemin sonucunu ve ilgili bilgileri içeren <see cref="UseRewardPointsResponseDataDto"/> nesnesi.
+        /// Başarılı olması durumunda, <see cref="UseRewardPointsResponseDataDto.Result"/> alanı başarılı olarak döner.
+        /// Başarısız olması durumunda, hata kodu ve mesajı ile birlikte döner.
+        /// </returns>
+        public UseRewardPointsResponseDataDto UseRewardPoints(UseRewardPointsRequestDataDto useRewardPointsRequestDto)
+        {
+            try
+            {
+                // Para puan ödeme isteği için gerekli DTO'nun oluşturulması.
+                var dto = new UseRewardPointsRequestDto
+                {
+                    Currency = useRewardPointsRequestDto?.Order?.Currency,
+                    Lang = useRewardPointsRequestDto?.Order?.Language,
+                    OrderId = useRewardPointsRequestDto?.Order?.OrderId,
+                    Pan = useRewardPointsRequestDto?.Card?.CardNo,
+                    Cvv2 = useRewardPointsRequestDto?.Card?.CVC,
+                    Expiry = useRewardPointsRequestDto?.Card?.ExpireDate,
+                    BonusAmount = useRewardPointsRequestDto?.Order?.BonusAmount,
+                    PurchAmount = useRewardPointsRequestDto?.Order?.Amount,
+                    MbrId = useRewardPointsRequestDto?.Account?.MbrId,
+                    MerchantID = useRewardPointsRequestDto?.Account?.MerchantId,
+                    UserCode = useRewardPointsRequestDto?.Account?.UserCode,
+                    UserPass = useRewardPointsRequestDto?.Account?.UserPass,
+                    SecureType = useRewardPointsRequestDto?.Account?.SecureType,
+                    TxnType = useRewardPointsRequestDto?.Account?.TxnType,
+
+                };
+
+                var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, useRewardPointsRequestDto?.Account?.BaseUrl);
+
+                // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
+                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                {
+                    return new UseRewardPointsResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{useRewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                    };
+                }
+
+                // API yanıtının deserialization işlemi.
+                var result = XmlHelper.DeserializeFromXml<UseRewardPointsResponseDto>(response.Content);
+                if (result == null)
+                {
+                    return new UseRewardPointsResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{useRewardPointsRequestDto?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result.ProcReturnCode != Results.Approved)
+                {
+                    return new UseRewardPointsResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{useRewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
+                        RewardPointsResponse = result
+                    };
+                }
+
+                return new UseRewardPointsResponseDataDto
+                {
+                    Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{useRewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarılı."),
+                    RewardPointsResponse = result
+                };
+            }
+            catch (Exception ex)
+            {
+                // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
+                return new UseRewardPointsResponseDataDto
+                {
+                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{useRewardPointsRequestDto?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
             }
         }

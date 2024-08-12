@@ -45,5 +45,22 @@ namespace QNBFinansbank.VirtualPos.Utility.Serialization
             using StringReader stringReader = new(xml);
             return xmlSerializer.Deserialize(stringReader) as T;
         }
+
+        /// <summary>
+        /// Verilen nesneyi belirtilen root element ismi ile XML string'e çevirir.
+        /// </summary>
+        /// <typeparam name="T">Serileştirilecek nesnenin tipi.</typeparam>
+        /// <param name="dto">Serileştirilecek nesne.</param>
+        /// <param name="rootName">XML root element ismi.</param>
+        /// <returns>Belirtilen root element ismi ile XML string formatında serileştirilmiş nesne.</returns>
+        public static string SerializeWithCustomRoot<T>(T dto, string rootName)
+        {
+            var xmlRoot = new XmlRootAttribute(rootName);
+            var serializer = new XmlSerializer(typeof(T), xmlRoot);
+
+            using var stringWriter = new StringWriter();
+            serializer.Serialize(stringWriter, dto);
+            return stringWriter.ToString();
+        }
     }
 }

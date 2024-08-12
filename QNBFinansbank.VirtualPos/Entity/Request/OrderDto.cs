@@ -39,6 +39,14 @@
         public string? Amount { get; set; }
 
         /// <summary>
+        /// İşlemin ödül tutarı. 
+        /// Bu özellik, ödeme miktarında kullanılacak olan ödül tutarını belirtir. Kuruş ayraç operatörü olarak (.) kullanılmalı ve kuruş hanesi 2 karakter olmalıdır. 
+        /// Örneğin, "100.50" (100 Türk Lirası 50 kuruş) gibi.
+        /// Varsayılan değer olarak <c>null</c> olabilir.
+        /// </summary>
+        public string? BonusAmount { get; set; }
+
+        /// <summary>
         /// Dil bilgisi. 
         /// Bu özellik, ödeme işlemi sırasında kullanılacak dili belirtir. Örneğin, "tr" (Türkçe), "en" (İngilizce) gibi değerler alabilir.
         /// Varsayılan değer olarak <c>null</c> olabilir.
