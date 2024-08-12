@@ -3,6 +3,7 @@ using QNBFinansbank.VirtualPos.Constant;
 using QNBFinansbank.VirtualPos.Entity.Request;
 using QNBFinansbank.VirtualPos.Entity.Request.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
+using QNBFinansbank.VirtualPos.Entity.Request.History;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.NonSecure;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.ThreeD;
@@ -13,6 +14,7 @@ using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Usage;
 using QNBFinansbank.VirtualPos.Entity.Response.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Response.Check;
+using QNBFinansbank.VirtualPos.Entity.Response.History;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment.NonSecure;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment.ThreeD.ModelPayment;
@@ -286,154 +288,6 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 return new PaymentResponseDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"İşlem sırasında tanımsız hata. Hata: {ex.Message}")
-                };
-            }
-        }
-
-        /// <summary>
-        /// NonSecure ödeme işlemi gerçekleştirir.
-        /// </summary>
-        /// <param name="startPayment">Ödeme işlemi için gerekli olan tüm bilgileri içeren DTO nesnesi.</param>
-        /// <returns>Ödeme işleminin sonucunu temsil eden <see cref="PaymentResponseDto"/> nesnesi.</returns>
-        private static PaymentResponseDto NonSecurePayment(PaymentRequestDataDto startPayment)
-        {
-            try
-            {
-                // Ödeme isteği için gerekli DTO'nun oluşturulması.
-                var dto = new NonSecurePaymentRequestDto
-                {
-                    Currency = startPayment?.Order?.Currency,
-                    Lang = startPayment?.Order?.Language,
-                    OrderId = startPayment?.Order?.OrderId,
-                    PurchAmount = startPayment?.Order?.Amount,
-                    InstallmentCount = startPayment?.Order?.Installment == "1" ? "0" : startPayment?.Order?.Installment,
-
-                    MbrId = startPayment?.Account?.MbrId,
-                    MerchantID = startPayment?.Account?.MerchantId,
-                    UserCode = startPayment?.Account?.UserCode,
-                    UserPass = startPayment?.Account?.UserPass,
-
-                    SecureType = startPayment?.Account?.SecureType,
-                    TxnType = startPayment?.Account?.TxnType,
-
-                    Pan = startPayment?.Card?.CardNo,
-                    Cvv2 = startPayment?.Card?.CVC,
-                    Expiry = startPayment?.Card?.ExpireDate,
-                };
-
-                var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, startPayment?.Account?.BaseUrl);
-
-                // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
-                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
-                {
-                    return new PaymentResponseDto
-                    {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{startPayment?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
-                    };
-                }
-
-                // API yanıtının deserialization işlemi.
-                var result = XmlHelper.DeserializeFromXml<NonSecurePaymentResponseDto>(response.Content);
-                if (result == null)
-                {
-                    return new PaymentResponseDto
-                    {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{startPayment?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
-                        Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId)
-                    };
-                }
-
-                // İşlemin başarı koduna göre sonuç döndürülmesi.
-                if (result.ProcReturnCode != "00")
-                {
-                    return new PaymentResponseDto
-                    {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{startPayment?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
-                        Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId)
-                    };
-                }
-
-                return new PaymentResponseDto
-                {
-                    Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{startPayment?.Account?.SecureType} ödeme işlemi başarılı."),
-                    Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId)
-                };
-            }
-            catch (Exception ex)
-            {
-                // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
-                return new PaymentResponseDto
-                {
-                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{startPayment?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
-                };
-            }
-        }
-
-        /// <summary>
-        /// 3D ödeme işlemini gerçekleştirir.
-        /// </summary>
-        /// <param name="startPayment">Ödeme işlemi için gerekli olan tüm bilgileri içeren DTO nesnesi.</param>
-        /// <returns>Ödeme işleminin sonucunu temsil eden <see cref="PaymentResponseDto"/> nesnesi.</returns>
-        private static PaymentResponseDto ThreeDPayment(PaymentRequestDataDto? startPayment)
-        {
-            try
-            {
-                string hash = PaymentHashHelper(startPayment?.Account, startPayment?.Order);
-                if (string.IsNullOrEmpty(hash))
-                {
-                    return new PaymentResponseDto
-                    {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{startPayment?.Account?.SecureType} ödeme işlemi başlatılmak istenmiştir, ancak hash değeri oluşturulamadığı için ödeme başlatılamamıştır.")
-                    };
-                }
-
-                var dto = new ThreeDPaymentRequestDto
-                {
-                    Currency = startPayment?.Order?.Currency,
-                    Lang = startPayment?.Order?.Language,
-                    OrderId = startPayment?.Order?.OrderId,
-                    PurchAmount = startPayment?.Order?.Amount,
-                    InstallmentCount = startPayment?.Order?.Installment == "1" ? "0" : startPayment?.Order?.Installment,
-
-                    MbrId = startPayment?.Account?.MbrId,
-                    MerchantID = startPayment?.Account?.MerchantId,
-                    UserCode = startPayment?.Account?.UserCode,
-                    UserPass = startPayment?.Account?.UserPass,
-
-                    SecureType = startPayment?.Account?.SecureType,
-                    TxnType = startPayment?.Account?.TxnType,
-
-                    Pan = startPayment?.Card?.CardNo,
-                    Cvv2 = startPayment?.Card?.CVC,
-                    Expiry = startPayment?.Card?.ExpireDate,
-
-                    OkUrl = startPayment?.Order?.ReturnUrl,
-                    FailUrl = startPayment?.Order?.ReturnUrl,
-                    Rnd = startPayment?.Order?.Random,
-                    Hash = hash,
-
-                    //PF aşaması henüz tamamlanmadığı için kapatıldı.
-                    //PaymentFacilicator = new PaymentFacilicatorRequestDto
-                    //{
-
-                    //}
-                };
-
-                var collection = NameValueCollectionHelper.ToNameValueCollection(dto);
-
-                string html = NameValueCollectionHelper.GenerateHtmlForm(collection, startPayment?.Account?.BaseUrl);
-
-                return new PaymentResponseDto
-                {
-                    Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{startPayment?.Account?.SecureType} ödeme işlemi başarılı."),
-                    Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId, html)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new PaymentResponseDto
-                {
-                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{startPayment?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
             }
         }
@@ -738,6 +592,233 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 return new UseRewardPointsResponseDataDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{useRewardPointsRequestDto?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
+                };
+            }
+        }
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinden işlem geçmişini sorgular.
+        /// Bu yöntem, işlem geçmişi sorgulama parametrelerini alarak işlem sonucunu döner.
+        /// </summary>
+        /// <param name="historyRequestDataDto">
+        /// İşlem geçmişi sorgulama işlemi için gerekli olan parametreleri içeren bir <see cref="HistoryRequestDataDto"/> nesnesi.
+        /// Bu nesne, sorgulama işlemiyle ilgili hesap, sipariş ve tarih bilgilerini içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu içeren bir <see cref="HistoryResponseDataDto"/> nesnesi döner.
+        /// Bu nesne, işlem geçmişi sorgulama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
+        public HistoryResponseDataDto History(HistoryRequestDataDto historyRequestDataDto)
+        {
+            try
+            {
+                // İşlem geçmişi sorgulama isteği için gerekli DTO'nun oluşturulması.
+                var dto = new HistoryRequestDto
+                {
+                    Currency = historyRequestDataDto?.Order?.Currency,
+                    Lang = historyRequestDataDto?.Order?.Language,
+                    OrderId = historyRequestDataDto?.Order?.OrderId,
+                    MbrId = historyRequestDataDto?.Account?.MbrId,
+                    MerchantID = historyRequestDataDto?.Account?.MerchantId,
+                    UserCode = historyRequestDataDto?.Account?.UserCode,
+                    UserPass = historyRequestDataDto?.Account?.UserPass,
+                    SecureType = historyRequestDataDto?.Account?.SecureType,
+                    TxnType = historyRequestDataDto?.Account?.TxnType,
+                    ReqDate = historyRequestDataDto?.RequestDate,
+                    RequestStartDatetime = historyRequestDataDto?.RequestStartDatetime,
+                };
+
+                var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, historyRequestDataDto?.Account?.BaseUrl);
+
+                // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
+                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                {
+                    return new HistoryResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                    };
+                }
+
+                // API yanıtının deserialization işlemi.
+                var result = XmlHelper.DeserializeFromXml<HistoryResponseDto>(response.Content);
+                if (result == null)
+                {
+                    return new HistoryResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result?.PaymentRequest?.ProcReturnCode != Results.Approved)
+                {
+                    return new HistoryResponseDataDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result?.PaymentRequest?.ProcReturnCode} | Hata Mesajı: {result?.PaymentRequest?.ErrMsg}"),
+                        History = result
+                    };
+                }
+
+                return new HistoryResponseDataDto
+                {
+                    Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi başarılı."),
+                    History = result
+                };
+            }
+            catch (Exception ex)
+            {
+                // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
+                return new HistoryResponseDataDto
+                {
+                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
+                };
+            }
+        }
+
+        /// <summary>
+        /// NonSecure ödeme işlemi gerçekleştirir.
+        /// </summary>
+        /// <param name="startPayment">Ödeme işlemi için gerekli olan tüm bilgileri içeren DTO nesnesi.</param>
+        /// <returns>Ödeme işleminin sonucunu temsil eden <see cref="PaymentResponseDto"/> nesnesi.</returns>
+        private static PaymentResponseDto NonSecurePayment(PaymentRequestDataDto startPayment)
+        {
+            try
+            {
+                // Ödeme isteği için gerekli DTO'nun oluşturulması.
+                var dto = new NonSecurePaymentRequestDto
+                {
+                    Currency = startPayment?.Order?.Currency,
+                    Lang = startPayment?.Order?.Language,
+                    OrderId = startPayment?.Order?.OrderId,
+                    PurchAmount = startPayment?.Order?.Amount,
+                    InstallmentCount = startPayment?.Order?.Installment == "1" ? "0" : startPayment?.Order?.Installment,
+
+                    MbrId = startPayment?.Account?.MbrId,
+                    MerchantID = startPayment?.Account?.MerchantId,
+                    UserCode = startPayment?.Account?.UserCode,
+                    UserPass = startPayment?.Account?.UserPass,
+
+                    SecureType = startPayment?.Account?.SecureType,
+                    TxnType = startPayment?.Account?.TxnType,
+
+                    Pan = startPayment?.Card?.CardNo,
+                    Cvv2 = startPayment?.Card?.CVC,
+                    Expiry = startPayment?.Card?.ExpireDate,
+                };
+
+                var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, startPayment?.Account?.BaseUrl);
+
+                // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
+                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                {
+                    return new PaymentResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{startPayment?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                    };
+                }
+
+                // API yanıtının deserialization işlemi.
+                var result = XmlHelper.DeserializeFromXml<NonSecurePaymentResponseDto>(response.Content);
+                if (result == null)
+                {
+                    return new PaymentResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{startPayment?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                        Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId)
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result.ProcReturnCode != "00")
+                {
+                    return new PaymentResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{startPayment?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
+                        Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId)
+                    };
+                }
+
+                return new PaymentResponseDto
+                {
+                    Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{startPayment?.Account?.SecureType} ödeme işlemi başarılı."),
+                    Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId)
+                };
+            }
+            catch (Exception ex)
+            {
+                // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
+                return new PaymentResponseDto
+                {
+                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{startPayment?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
+                };
+            }
+        }
+
+        /// <summary>
+        /// 3D ödeme işlemini gerçekleştirir.
+        /// </summary>
+        /// <param name="startPayment">Ödeme işlemi için gerekli olan tüm bilgileri içeren DTO nesnesi.</param>
+        /// <returns>Ödeme işleminin sonucunu temsil eden <see cref="PaymentResponseDto"/> nesnesi.</returns>
+        private static PaymentResponseDto ThreeDPayment(PaymentRequestDataDto? startPayment)
+        {
+            try
+            {
+                string hash = PaymentHashHelper(startPayment?.Account, startPayment?.Order);
+                if (string.IsNullOrEmpty(hash))
+                {
+                    return new PaymentResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{startPayment?.Account?.SecureType} ödeme işlemi başlatılmak istenmiştir, ancak hash değeri oluşturulamadığı için ödeme başlatılamamıştır.")
+                    };
+                }
+
+                var dto = new ThreeDPaymentRequestDto
+                {
+                    Currency = startPayment?.Order?.Currency,
+                    Lang = startPayment?.Order?.Language,
+                    OrderId = startPayment?.Order?.OrderId,
+                    PurchAmount = startPayment?.Order?.Amount,
+                    InstallmentCount = startPayment?.Order?.Installment == "1" ? "0" : startPayment?.Order?.Installment,
+
+                    MbrId = startPayment?.Account?.MbrId,
+                    MerchantID = startPayment?.Account?.MerchantId,
+                    UserCode = startPayment?.Account?.UserCode,
+                    UserPass = startPayment?.Account?.UserPass,
+
+                    SecureType = startPayment?.Account?.SecureType,
+                    TxnType = startPayment?.Account?.TxnType,
+
+                    Pan = startPayment?.Card?.CardNo,
+                    Cvv2 = startPayment?.Card?.CVC,
+                    Expiry = startPayment?.Card?.ExpireDate,
+
+                    OkUrl = startPayment?.Order?.ReturnUrl,
+                    FailUrl = startPayment?.Order?.ReturnUrl,
+                    Rnd = startPayment?.Order?.Random,
+                    Hash = hash,
+
+                    //PF aşaması henüz tamamlanmadığı için kapatıldı.
+                    //PaymentFacilicator = new PaymentFacilicatorRequestDto
+                    //{
+
+                    //}
+                };
+
+                var collection = NameValueCollectionHelper.ToNameValueCollection(dto);
+
+                string html = NameValueCollectionHelper.GenerateHtmlForm(collection, startPayment?.Account?.BaseUrl);
+
+                return new PaymentResponseDto
+                {
+                    Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{startPayment?.Account?.SecureType} ödeme işlemi başarılı."),
+                    Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId, html)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new PaymentResponseDto
+                {
+                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{startPayment?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
             }
         }

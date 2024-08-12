@@ -1,5 +1,6 @@
 ﻿using QNBFinansbank.VirtualPos.Entity.Request.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
+using QNBFinansbank.VirtualPos.Entity.Request.History;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Request.PreAuth;
@@ -8,6 +9,7 @@ using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Usage;
 using QNBFinansbank.VirtualPos.Entity.Response.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Response.Check;
+using QNBFinansbank.VirtualPos.Entity.Response.History;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Response.PreAuth;
@@ -130,5 +132,19 @@ namespace QNBFinansbank.VirtualPos.Business.Abstract
         /// Bu nesne, para puan kullanım işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
         UseRewardPointsResponseDataDto UseRewardPoints(UseRewardPointsRequestDataDto useRewardPointsRequestDto);
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinde işlem geçmişini sorgular.
+        /// Bu yöntem, işlem geçmişi sorgulama parametrelerini alarak işlem sonucunu döner.
+        /// </summary>
+        /// <param name="historyRequestDataDto">
+        /// İşlem geçmişi sorgulama işlemi için gerekli olan parametreleri içeren bir <see cref="HistoryRequestDataDto"/> nesnesi.
+        /// Bu nesne, sorgulama işlemiyle ilgili hesap, sipariş ve sorgulama tarih bilgilerini içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu içeren bir <see cref="HistoryResponseDataDto"/> nesnesi döner.
+        /// Bu nesne, işlem geçmişi sorgulama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
+        HistoryResponseDataDto History(HistoryRequestDataDto historyRequestDataDto);
     }
 }
