@@ -7,12 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Business\Abstract\" />
-    <Folder Include="Business\Concrete\" />
-    <Folder Include="Constant\" />
     <Folder Include="Utility\ApiClient\" />
-    <Folder Include="Utility\Serialization\" />
-    <Folder Include="Utility\ResponseHandlers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RestSharp" Version="111.4.1" />
   </ItemGroup>
 
 </Project>

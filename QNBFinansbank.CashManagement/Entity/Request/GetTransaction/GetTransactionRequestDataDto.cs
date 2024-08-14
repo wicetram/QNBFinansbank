@@ -1,9 +1,9 @@
 ﻿using System.Xml.Serialization;
 
-namespace QNBFinansbank.CashManagement.Entity.Request
+namespace QNBFinansbank.CashManagement.Entity.Request.GetTransaction
 {
     [XmlRoot(ElementName = "Envelope", Namespace = "http://www.w3.org/2003/05/soap-envelope")]
-    public class GetTransactionRequestDto : IDto
+    public class GetTransactionRequestDataDto : IDto
     {
         [XmlElement(ElementName = "Body", Namespace = "http://www.w3.org/2003/05/soap-envelope")]
         public GetTransactionRequestBody? Body { get; set; }
