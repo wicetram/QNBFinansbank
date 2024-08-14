@@ -30,14 +30,14 @@ namespace QNBFinansbank.VirtualPos.Business.Abstract
         /// Bu yöntem, ödeme parametrelerini alarak ödeme işlemini başlatır ve işleme ilişkin sonucu döner.
         /// </summary>
         /// <param name="startPayment">
-        /// Ödeme işlemini başlatmak için gerekli olan parametreleri içeren bir <see cref="PaymentRequestDataDto"/> nesnesi.
+        /// Ödeme işlemini başlatmak için gerekli olan parametreleri içeren bir <see cref="PaymentRequestDto"/> nesnesi.
         /// Bu nesne, ödeme miktarı, kart bilgileri, müşteri bilgileri gibi detayları içerebilir.
         /// </param>
         /// <returns>
         /// İşlemin sonucunu içeren bir <see cref="PaymentResponseDto"/> nesnesi döner. 
         /// Bu nesne, ödeme işleminin başarı durumunu, işlem sonucunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
-        PaymentResponseDto Payment(PaymentRequestDataDto startPayment);
+        PaymentResponseDto Payment(PaymentRequestDto startPayment);
 
         /// <summary>
         /// QNB Finansbank Sanal Pos üzerinde 3D Model ile başlatılan bir ödemeyi tamamlar.
@@ -48,123 +48,123 @@ namespace QNBFinansbank.VirtualPos.Business.Abstract
         /// Bu nesne, işlemle ilgili güvenlik bilgileri, sipariş numarası ve diğer ilgili detayları içerebilir.
         /// </param>
         /// <returns>
-        /// İşlemin sonucunu içeren bir <see cref="ThreeDModelPaymentResponseDataDto"/> nesnesi döner.
+        /// İşlemin sonucunu içeren bir <see cref="ThreeDModelPaymentResponseDto"/> nesnesi döner.
         /// Bu nesne, işlem sonucunu, işlemle ilgili hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
-        ThreeDModelPaymentResponseDataDto ThreeDModelPayment(ThreeDModelPaymentRequestDto threeDModel);
+        ThreeDModelPaymentResponseDto ThreeDModelPayment(ThreeDModelPaymentRequestDto threeDModel);
 
         /// <summary>
         /// QNB Finansbank Sanal Pos üzerinde başlatılmış bir ön otorizasyon (Pre-Auth) işlemini sonlandırır.
         /// Bu yöntem, ön otorizasyon talebini alarak işlemi sonlandırır ve işlem sonucunu döner.
         /// </summary>
         /// <param name="preAuthRequest">
-        /// Ön otorizasyon işlemini sonlandırmak için gerekli olan parametreleri içeren bir <see cref="PreAuthRequestDataDto"/> nesnesi.
+        /// Ön otorizasyon işlemini sonlandırmak için gerekli olan parametreleri içeren bir <see cref="PreAuthRequestDto"/> nesnesi.
         /// Bu nesne, sonlandırılacak işlemle ilgili detayları içerebilir.
         /// </param>
         /// <returns>
-        /// İşlemin sonucunu içeren bir <see cref="PreAuthResponseDataDto"/> nesnesi döner. 
+        /// İşlemin sonucunu içeren bir <see cref="PreAuthResponseDto"/> nesnesi döner. 
         /// Bu nesne, ön otorizasyon işleminin sonlandırılmasının başarı durumunu, işlem sonucunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
-        PreAuthResponseDataDto StopPreAuth(PreAuthRequestDataDto preAuthRequest);
+        PreAuthResponseDto StopPreAuth(PreAuthRequestDto preAuthRequest);
 
         /// <summary>
         /// QNB Finansbank Sanal Pos üzerinde bir ödeme işlemini iptal eder.
         /// Bu yöntem, iptal parametrelerini alarak iptal işlemini gerçekleştirir ve işlem sonucunu döner.
         /// </summary>
         /// <param name="cancel">
-        /// İptal işlemini başlatmak için gerekli olan parametreleri içeren bir <see cref="CancelRequestDataDto"/> nesnesi.
+        /// İptal işlemini başlatmak için gerekli olan parametreleri içeren bir <see cref="CancelRequestDto"/> nesnesi.
         /// Bu nesne, iptal edilecek işlemle ilgili detayları içerebilir.
         /// </param>
         /// <returns>
-        /// İşlemin sonucunu içeren bir <see cref="CancelResponseDataDto"/> nesnesi döner. 
+        /// İşlemin sonucunu içeren bir <see cref="CancelResponseDto"/> nesnesi döner. 
         /// Bu nesne, iptal işleminin başarı durumunu, işlem sonucunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
-        CancelResponseDataDto Cancel(CancelRequestDataDto cancel);
+        CancelResponseDto Cancel(CancelRequestDto cancel);
 
         /// <summary>
         /// QNB Finansbank Sanal Pos üzerinde bir ödeme işleminin geri ödeme (iade) işlemini başlatır.
         /// Bu yöntem, geri ödeme parametrelerini alarak geri ödeme işlemini gerçekleştirir ve işlem sonucunu döner.
         /// </summary>
         /// <param name="refund">
-        /// Geri ödeme işlemini başlatmak için gerekli olan parametreleri içeren bir <see cref="RefundRequestDataDto"/> nesnesi.
+        /// Geri ödeme işlemini başlatmak için gerekli olan parametreleri içeren bir <see cref="RefundRequestDto"/> nesnesi.
         /// Bu nesne, geri ödeme yapılacak işlemle ilgili detayları içerebilir.
         /// </param>
         /// <returns>
-        /// İşlemin sonucunu içeren bir <see cref="RefundResponseDataDto"/> nesnesi döner. 
+        /// İşlemin sonucunu içeren bir <see cref="RefundResponseDto"/> nesnesi döner. 
         /// Bu nesne, geri ödeme işleminin başarı durumunu, işlem sonucunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
-        RefundResponseDataDto Refund(RefundRequestDataDto refund);
+        RefundResponseDto Refund(RefundRequestDto refund);
 
         /// <summary>
         /// QNB Finansbank Sanal Pos üzerinde bir ödeme işleminin durumunu kontrol eder.
         /// Bu yöntem, kontrol parametrelerini alarak ödeme işleminin mevcut durumunu döner.
         /// </summary>
         /// <param name="check">
-        /// İşlemin durumunu kontrol etmek için gerekli olan parametreleri içeren bir <see cref="CheckRequestDataDto"/> nesnesi.
+        /// İşlemin durumunu kontrol etmek için gerekli olan parametreleri içeren bir <see cref="CheckRequestDto"/> nesnesi.
         /// Bu nesne, kontrol edilecek işlemle ilgili detayları içerebilir.
         /// </param>
         /// <returns>
-        /// İşlemin durumunu içeren bir <see cref="CheckResponseDataDto"/> nesnesi döner. 
+        /// İşlemin durumunu içeren bir <see cref="CheckResponseDto"/> nesnesi döner. 
         /// Bu nesne, işlem durumunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
-        CheckResponseDataDto Check(CheckRequestDataDto check);
+        CheckResponseDto Check(CheckRequestDto check);
 
         /// <summary>
         /// QNB Finansbank Sanal Pos üzerinden para puanları sorgular.
         /// Bu yöntem, para puan sorgulama parametrelerini alarak işlem sonucunu döner.
         /// </summary>
         /// <param name="rewardPointsRequestDto">
-        /// Para puan sorgulama işlemi için gerekli olan parametreleri içeren bir <see cref="CheckRewardPointsRequestDataDto"/> nesnesi.
+        /// Para puan sorgulama işlemi için gerekli olan parametreleri içeren bir <see cref="CheckRewardPointsRequestDto"/> nesnesi.
         /// Bu nesne, sorgulama işlemiyle ilgili hesap, sipariş ve kart bilgilerini içerebilir.
         /// </param>
         /// <returns>
-        /// İşlemin sonucunu içeren bir <see cref="CheckRewardPointsResponseDataDto"/> nesnesi döner.
+        /// İşlemin sonucunu içeren bir <see cref="CheckRewardPointsResponseDto"/> nesnesi döner.
         /// Bu nesne, para puan sorgulama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
-        CheckRewardPointsResponseDataDto CheckRewardPoints(CheckRewardPointsRequestDataDto rewardPointsRequestDto);
+        CheckRewardPointsResponseDto CheckRewardPoints(CheckRewardPointsRequestDto rewardPointsRequestDto);
 
         /// <summary>
         /// QNB Finansbank Sanal Pos üzerinden para puanları kullanarak ödeme yapar.
         /// Bu yöntem, para puan kullanım parametrelerini alarak işlem sonucunu döner.
         /// </summary>
         /// <param name="useRewardPointsRequestDto">
-        /// Para puan kullanım işlemi için gerekli olan parametreleri içeren bir <see cref="UseRewardPointsRequestDataDto"/> nesnesi.
+        /// Para puan kullanım işlemi için gerekli olan parametreleri içeren bir <see cref="UseRewardPointsRequestDto"/> nesnesi.
         /// Bu nesne, işlemle ilgili hesap, sipariş ve kart bilgilerini içerebilir.
         /// </param>
         /// <returns>
-        /// İşlemin sonucunu içeren bir <see cref="UseRewardPointsResponseDataDto"/> nesnesi döner.
+        /// İşlemin sonucunu içeren bir <see cref="UseRewardPointsResponseDto"/> nesnesi döner.
         /// Bu nesne, para puan kullanım işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
-        UseRewardPointsResponseDataDto UseRewardPoints(UseRewardPointsRequestDataDto useRewardPointsRequestDto);
+        UseRewardPointsResponseDto UseRewardPoints(UseRewardPointsRequestDto useRewardPointsRequestDto);
 
         /// <summary>
         /// QNB Finansbank Sanal Pos üzerinde işlem geçmişini sorgular.
         /// Bu yöntem, işlem geçmişi sorgulama parametrelerini alarak işlem sonucunu döner.
         /// </summary>
         /// <param name="historyRequestDataDto">
-        /// İşlem geçmişi sorgulama işlemi için gerekli olan parametreleri içeren bir <see cref="HistoryRequestDataDto"/> nesnesi.
+        /// İşlem geçmişi sorgulama işlemi için gerekli olan parametreleri içeren bir <see cref="HistoryRequestDto"/> nesnesi.
         /// Bu nesne, sorgulama işlemiyle ilgili hesap, sipariş ve sorgulama tarih bilgilerini içerebilir.
         /// </param>
         /// <returns>
-        /// İşlemin sonucunu içeren bir <see cref="HistoryResponseDataDto"/> nesnesi döner.
+        /// İşlemin sonucunu içeren bir <see cref="HistoryResponseDto"/> nesnesi döner.
         /// Bu nesne, işlem geçmişi sorgulama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
-        HistoryResponseDataDto History(HistoryRequestDataDto historyRequestDataDto);
+        HistoryResponseDto History(HistoryRequestDto historyRequestDataDto);
 
         /// <summary>
         /// QNB Finansbank Sanal Pos üzerinde toplu kapama (batch close) işlemini gerçekleştirir.
         /// Bu yöntem, toplu kapama parametrelerini alarak işlem sonucunu döner.
         /// </summary>
         /// <param name="batchCloseRequestDto">
-        /// Toplu kapama işlemi için gerekli olan parametreleri içeren bir <see cref="BatchCloseRequestDataDto"/> nesnesi.
+        /// Toplu kapama işlemi için gerekli olan parametreleri içeren bir <see cref="BatchCloseRequestDto"/> nesnesi.
         /// Bu nesne, işlemle ilgili hesap bilgilerini içerebilir.
         /// </param>
         /// <returns>
-        /// İşlemin sonucunu içeren bir <see cref="BatchCloseResponseDataDto"/> nesnesi döner.
+        /// İşlemin sonucunu içeren bir <see cref="BatchCloseResponseDto"/> nesnesi döner.
         /// Bu nesne, toplu kapama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
-        BatchCloseResponseDataDto BatchClose(BatchCloseRequestDataDto batchCloseRequestDto);
+        BatchCloseResponseDto BatchClose(BatchCloseRequestDto batchCloseRequestDto);
 
-        SegmentInquiryResponseDataDto SegmentInquiry(SegmentInquiryRequestDataDto segmentInquiryRequestDto);
+        SegmentInquiryResponseDto SegmentInquiry(SegmentInquiryRequestDto segmentInquiryRequestDto);
     }
 }

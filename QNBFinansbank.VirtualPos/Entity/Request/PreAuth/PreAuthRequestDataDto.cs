@@ -1,28 +1,50 @@
-﻿namespace QNBFinansbank.VirtualPos.Entity.Request.PreAuth
+﻿using System.Xml.Serialization;
+
+namespace QNBFinansbank.VirtualPos.Entity.Request.PreAuth
 {
-    /// <summary>
-    /// Ön otorizasyon (Pre-Auth) işlemi için gerekli olan veri transfer objesini (DTO) temsil eder.
-    /// Bu sınıf, bir ön otorizasyon talebi sırasında gönderilecek olan hesap ve sipariş bilgilerini içerir.
-    /// </summary>
+    [XmlRoot(ElementName = "PayforRequest", Namespace = "")]
     public class PreAuthRequestDataDto : IDto
     {
-        /// <summary>
-        /// Hesap bilgilerini temsil eden DTO.
-        /// Bu alan, işlemin yapılacağı hesabın detaylarını içerir.
-        /// </summary>
-        public AccountDto? Account { get; set; }
+        [XmlElement(ElementName = "MbrId")]
+        public string? MbrId { get; set; }
 
-        /// <summary>
-        /// Sipariş bilgilerini temsil eden DTO.
-        /// Bu alan, işlemin yapılacağı siparişe ilişkin detayları içerir.
-        /// </summary>
-        public OrderDto? Order { get; set; }
+        [XmlElement(ElementName = "MerchantID")]
+        public string? MerchantID { get; set; }
 
+        [XmlElement(ElementName = "UserCode")]
+        public string? UserCode { get; set; }
 
-        /// <summary>
-        /// Kart bilgilerini temsil eden DTO.
-        /// Bu alan, işlemin gerçekleştirileceği kartın detaylarını içerir.
-        /// </summary>
-        public CardDto? Card { get; set; }
+        [XmlElement(ElementName = "UserPass")]
+        public string? UserPass { get; set; }
+
+        [XmlElement(ElementName = "OrderId")]
+        public string? OrderId { get; set; }
+
+        [XmlElement(ElementName = "SecureType")]
+        public string? SecureType { get; set; }
+
+        [XmlElement(ElementName = "TxnType")]
+        public string? TxnType { get; set; }
+
+        [XmlElement(ElementName = "PurchAmount")]
+        public string? PurchAmount { get; set; }
+
+        [XmlElement(ElementName = "Currency")]
+        public string? Currency { get; set; }
+
+        [XmlElement(ElementName = "Pan")]
+        public string? Pan { get; set; }
+
+        [XmlElement(ElementName = "Expiry")]
+        public string? Expiry { get; set; }
+
+        [XmlElement(ElementName = "Cvv2")]
+        public string? Cvv2 { get; set; }
+
+        [XmlElement(ElementName = "MOTO")]
+        public string? MOTO { get; set; }
+
+        [XmlElement(ElementName = "Lang")]
+        public string? Lang { get; set; }
     }
 }

@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Business\Abstract\" />
+    <Folder Include="Business\Concrete\" />
+    <Folder Include="Constant\" />
+    <Folder Include="Utility\ApiClient\" />
+    <Folder Include="Utility\Serialization\" />
+    <Folder Include="Utility\ResponseHandlers\" />
+  </ItemGroup>
+
+</Project>

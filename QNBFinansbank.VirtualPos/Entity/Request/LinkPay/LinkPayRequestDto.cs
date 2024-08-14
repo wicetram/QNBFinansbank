@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace QNBFinansbank.VirtualPos.Entity.Request.LinkPay
+﻿namespace QNBFinansbank.VirtualPos.Entity.Request.LinkPay
 {
-    internal class LinkPayRequestDto
+    public class LinkPayRequestDto : IDto
     {
+        public AccountDto? Account { get; set; }
     }
 }

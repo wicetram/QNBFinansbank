@@ -3,7 +3,7 @@
     /// <summary>
     /// İşlem geçmişine ait ödeme adresi detaylarını temsil eder.
     /// </summary>
-    public class HistoryResponseDtoPaymentAddressDto : IDto
+    public class HistoryResponseDataDtoPaymentAddressDto : IDto
     {
         /// <summary>
         /// İstek için benzersiz GUID.

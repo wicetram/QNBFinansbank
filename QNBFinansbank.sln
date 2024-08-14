@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QNBFinansbank.VirtualPos", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QNBFinansbank.WebUI", "QNBFinansbank.WebUI\QNBFinansbank.WebUI.csproj", "{2ADED46E-36BD-481F-AC2F-E55DB37FC39A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QNBFinansbank.CashManagement", "QNBFinansbank.CashManagement\QNBFinansbank.CashManagement.csproj", "{02579966-F01C-424F-B855-C05EA9DD8697}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{2ADED46E-36BD-481F-AC2F-E55DB37FC39A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2ADED46E-36BD-481F-AC2F-E55DB37FC39A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2ADED46E-36BD-481F-AC2F-E55DB37FC39A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02579966-F01C-424F-B855-C05EA9DD8697}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02579966-F01C-424F-B855-C05EA9DD8697}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02579966-F01C-424F-B855-C05EA9DD8697}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02579966-F01C-424F-B855-C05EA9DD8697}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

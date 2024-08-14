@@ -1,21 +1,72 @@
-﻿namespace QNBFinansbank.VirtualPos.Entity.Response.BatchClose
+﻿using System.Xml.Serialization;
+
+namespace QNBFinansbank.VirtualPos.Entity.Response.BatchClose
 {
     /// <summary>
-    /// QNB Finansbank Sanal Pos üzerinde gerçekleştirilen toplu kapama (batch close) işlemi sonucunu temsil eder.
-    /// Bu sınıf, işlem sonucunu ve toplu kapama işleminin detaylarını içerir.
+    /// QNB Finansbank Sanal Pos üzerinde toplu kapama (batch close) işleminin yanıt verilerini temsil eder.
+    /// Bu sınıf, toplu kapama işlemi sırasında bankadan gelen yanıt verilerini içerir.
     /// </summary>
+    [XmlRoot(ElementName = "PayforResponse")]
     public class BatchCloseResponseDataDto : IDto
     {
         /// <summary>
-        /// Toplu kapatma işleminin sonucunu ve durum bilgilerini içeren bir <see cref="ProcessResult"/> nesnesi.
-        /// Bu nesne, toplu kapatma işleminin başarı durumunu, işlem sonucunu ve varsa hata mesajlarını içerir.
+        /// İşlemin otorizasyon kodunu temsil eder.
         /// </summary>
-        public ProcessResult? Result { get; set; }
+        [XmlElement(ElementName = "AuthCode")]
+        public string? AuthCode { get; set; }
 
         /// <summary>
-        /// Toplu kapama işlemine ait detayları içerir.
-        /// Bu alan, işlemle ilgili otorizasyon kodu, banka referans numarası gibi bilgileri içerir.
+        /// Banka referans numarasını temsil eder.
         /// </summary>
-        public BatchCloseResponseDto? BatchClose { get; set; }
+        [XmlElement(ElementName = "HostRefNum")]
+        public string? HostRefNum { get; set; }
+
+        /// <summary>
+        /// İşlemin cevap kodunu temsil eder. Başarılıysa "00" döner.
+        /// </summary>
+        [XmlElement(ElementName = "ProcReturnCode")]
+        public string? ProcReturnCode { get; set; }
+
+        /// <summary>
+        /// İşlem kimliğini (transaction ID) temsil eder.
+        /// </summary>
+        [XmlElement(ElementName = "TransId")]
+        public string? TransId { get; set; }
+
+        /// <summary>
+        /// İşlem sırasında oluşan hata mesajını temsil eder.
+        /// </summary>
+        [XmlElement(ElementName = "ErrMsg")]
+        public string? ErrMsg { get; set; }
+
+        /// <summary>
+        /// Kart sahibinin adını temsil eder.
+        /// </summary>
+        [XmlElement(ElementName = "CardHolderName")]
+        public string? CardHolderName { get; set; }
+
+        /// <summary>
+        /// Ek taksit bilgilerini temsil eder.
+        /// </summary>
+        [XmlElement(ElementName = "ArtiTaksit")]
+        public string? ArtiTaksit { get; set; }
+
+        /// <summary>
+        /// Banka iç yanıt mesajını temsil eder.
+        /// </summary>
+        [XmlElement(ElementName = "BankInternalResponseMessage")]
+        public string? BankInternalResponseMessage { get; set; }
+
+        /// <summary>
+        /// XML isteğinden gelen ödeme bilgilerini temsil eder.
+        /// </summary>
+        [XmlElement(ElementName = "PAYFORFROMXMLREQUEST")]
+        public string? PayForFromXMLRequest { get; set; }
+
+        /// <summary>
+        /// Oturum sistem kullanıcısını temsil eder.
+        /// </summary>
+        [XmlElement(ElementName = "SESSION_SYSTEM_USER")]
+        public string? SessionSystemUser { get; set; }
     }
 }

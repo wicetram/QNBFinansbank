@@ -1,50 +1,27 @@
-﻿using System.Xml.Serialization;
-
-namespace QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Usage
+﻿namespace QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Usage
 {
-    [XmlRoot(ElementName = "PayforRequest")]
+    /// <summary>
+    /// Para puan kullanım işlemi için gerekli olan verileri içeren DTO sınıfı.
+    /// Bu sınıf, para puanları kullanarak bir ödeme veya işlem yapılması için gerekli olan hesap, sipariş ve kart bilgilerini içerir.
+    /// </summary>
     public class UseRewardPointsRequestDto : IDto
     {
-        [XmlElement(ElementName = "MbrId")]
-        public string? MbrId { get; set; }
+        /// <summary>
+        /// İşlemde kullanılacak hesap bilgilerini içeren <see cref="AccountDto"/> nesnesi.
+        /// Bu nesne, üye işyeri numarası, kullanıcı kodu, güvenlik bilgileri gibi hesap detaylarını içerir.
+        /// </summary>
+        public AccountDto? Account { get; set; }
 
-        [XmlElement(ElementName = "MerchantID")]
-        public string? MerchantID { get; set; }
+        /// <summary>
+        /// İşlemde kullanılacak sipariş bilgilerini içeren <see cref="OrderDto"/> nesnesi.
+        /// Bu nesne, sipariş numarası, işlem tutarı, para birimi gibi sipariş detaylarını içerir.
+        /// </summary>
+        public OrderDto? Order { get; set; }
 
-        [XmlElement(ElementName = "UserCode")]
-        public string? UserCode { get; set; }
-
-        [XmlElement(ElementName = "UserPass")]
-        public string? UserPass { get; set; }
-
-        [XmlElement(ElementName = "OrderId")]
-        public string? OrderId { get; set; }
-
-        [XmlElement(ElementName = "SecureType")]
-        public string? SecureType { get; set; }
-
-        [XmlElement(ElementName = "TxnType")]
-        public string? TxnType { get; set; }
-
-        [XmlElement(ElementName = "PurchAmount")]
-        public string? PurchAmount { get; set; }
-
-        [XmlElement(ElementName = "BonusAmount")]
-        public string? BonusAmount { get; set; }
-
-        [XmlElement(ElementName = "Currency")]
-        public string? Currency { get; set; }
-
-        [XmlElement(ElementName = "Pan")]
-        public string? Pan { get; set; }
-
-        [XmlElement(ElementName = "Expiry")]
-        public string? Expiry { get; set; }
-
-        [XmlElement(ElementName = "Cvv2")]
-        public string? Cvv2 { get; set; }
-
-        [XmlElement(ElementName = "Lang")]
-        public string? Lang { get; set; }
+        /// <summary>
+        /// İşlemde kullanılacak kart bilgilerini içeren <see cref="CardDto"/> nesnesi.
+        /// Bu nesne, kart numarası, son kullanma tarihi, güvenlik kodu gibi kart detaylarını içerir.
+        /// </summary>
+        public CardDto? Card { get; set; }
     }
 }

@@ -4,7 +4,7 @@
     /// İşlem geçmişine ait ödeme isteği detaylarını temsil eder.
     /// Bu sınıf, ödeme işlemi sırasında toplanan ve saklanan çeşitli bilgileri içerir.
     /// </summary>
-    public class HistoryResponseDtoPaymentRequestDto : IDto
+    public class HistoryResponseDataDtoPaymentRequestDto : IDto
     {
         /// <summary>
         /// İşlem için benzersiz GUID.

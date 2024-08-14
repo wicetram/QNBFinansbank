@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace QNBFinansbank.VirtualPos.Entity.Response.EOD
+﻿namespace QNBFinansbank.VirtualPos.Entity.Response.EOD
 {
-    internal class EODResponseDto
+    public class EODResponseDto : IDto
     {
+        public ProcessResult? Result { get; set; }
     }
 }

@@ -1,21 +1,24 @@
 ﻿namespace QNBFinansbank.VirtualPos.Entity.Response.History
 {
     /// <summary>
-    /// İşlem geçmişi sorgulama sonucunu temsil eden veri transfer nesnesi.
-    /// Bu sınıf, işlem geçmişi sorgulamasının sonucunu ve bu sonuca ait işlem geçmişi detaylarını içerir.
+    /// İşlem geçmişi sorgulama yanıtını temsil eden DTO.
+    /// Bu sınıf, ödeme isteği ve ödeme adresi gibi işlem geçmişine ait detayları içerir.
     /// </summary>
     public class HistoryResponseDataDto : IDto
     {
         /// <summary>
-        /// İşlemin durumunu ve başarı bilgisini içeren bir <see cref="ProcessResult"/> nesnesi.
-        /// Bu nesne, sorgulamanın başarılı olup olmadığını, hata mesajlarını ve ilgili bilgileri içerir.
+        /// İşlem geçmişine ait ödeme isteği detaylarını içerir.
         /// </summary>
-        public ProcessResult? Result { get; set; }
+        public HistoryResponseDataDtoPaymentRequestDto? PaymentRequest { get; set; }
 
         /// <summary>
-        /// İşlem geçmişine ait detayları içeren <see cref="HistoryResponseDto"/> nesnesi.
-        /// Bu nesne, sorgulanan işlem geçmişi ile ilgili tüm detayları barındırır.
+        /// İşlem geçmişine ait ödeme adresi detaylarını içerir.
         /// </summary>
-        public HistoryResponseDto? History { get; set; }
+        public HistoryResponseDataDtoPaymentAddressDto? PaymentAddress { get; set; }
+
+        /// <summary>
+        /// İşlemle ilgili ek parametreleri içeren bir liste.
+        /// </summary>
+        public List<List<string?>>? ExtraParameters { get; set; }
     }
 }

@@ -10,10 +10,4 @@
     <PackageReference Include="RestSharp" Version="111.4.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Entity\Request\Campaign\Check\" />
-    <Folder Include="Entity\Request\Campaign\Usage\" />
-    <Folder Include="Entity\Response\Campaign\" />
-  </ItemGroup>
-
 </Project>

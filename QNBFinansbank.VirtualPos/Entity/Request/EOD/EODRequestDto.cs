@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace QNBFinansbank.VirtualPos.Entity.Request.EOD
+﻿namespace QNBFinansbank.VirtualPos.Entity.Request.EOD
 {
-    internal class EODRequestDto
+    public class EODRequestDto : IDto
     {
+        public AccountDto? Account { get; set; }
     }
 }

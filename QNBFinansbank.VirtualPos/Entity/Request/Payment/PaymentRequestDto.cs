@@ -1,6 +1,6 @@
 ﻿namespace QNBFinansbank.VirtualPos.Entity.Request.Payment
 {
-    public class PaymentRequestDataDto : IDto
+    public class PaymentRequestDto : IDto
     {
         /// <summary>
         /// Banka hesap bilgilerinin yer aldığı obje

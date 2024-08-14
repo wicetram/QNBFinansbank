@@ -48,12 +48,12 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         /// Başarılı olması durumunda, `Result` alanı başarılı olarak döner. 
         /// Başarısız olması durumunda, hata kodu ve mesajı ile birlikte döner.
         /// </returns>
-        public CancelResponseDataDto Cancel(CancelRequestDataDto cancel)
+        public CancelResponseDto Cancel(CancelRequestDto cancel)
         {
             try
             {
                 // İptal isteği için gerekli DTO'nun oluşturulması.
-                var dto = new CancelRequestDto
+                var dto = new CancelRequestDataDto
                 {
                     Currency = cancel?.Order?.Currency,
                     Lang = cancel?.Order?.Language,
@@ -73,23 +73,23 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
                 if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
                 {
-                    return new CancelResponseDataDto
+                    return new CancelResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{cancel?.Account?.TxnType} işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
                     };
                 }
 
                 // API yanıtının deserialization işlemi.
-                var result = XmlHelper.DeserializeFromXml<CancelResponseDto>(response.Content);
+                var result = XmlHelper.DeserializeFromXml<CancelResponseDataDto>(response.Content);
                 if (result == null)
                 {
-                    return new CancelResponseDataDto
+                    return new CancelResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{cancel?.Account?.TxnType} işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
                     };
                 }
 
-                return new CancelResponseDataDto
+                return new CancelResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{cancel?.Account?.TxnType} işlemi başarılı."),
                     Cancel = result
@@ -98,7 +98,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
             catch (Exception ex)
             {
                 // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
-                return new CancelResponseDataDto
+                return new CancelResponseDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{cancel?.Account?.TxnType} işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
@@ -116,11 +116,11 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         /// İşlem başarılıysa, `Result` alanı başarılı olarak döner. 
         /// İşlem başarısızsa, hata kodu ve mesajı ile birlikte döner.
         /// </returns>
-        public CheckResponseDataDto Check(CheckRequestDataDto check)
+        public CheckResponseDto Check(CheckRequestDto check)
         {
             try
             {
-                var dto = new CheckRequestDto
+                var dto = new CheckRequestDataDto
                 {
                     Lang = check?.Order?.Language,
                     OrderId = check?.Order?.OrderId,
@@ -138,23 +138,23 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
                 if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
                 {
-                    return new CheckResponseDataDto
+                    return new CheckResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{check?.Account?.TxnType} işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
                     };
                 }
 
                 // API yanıtının deserialization işlemi.
-                var result = XmlHelper.DeserializeFromXml<CheckResponseDto>(response.Content);
+                var result = XmlHelper.DeserializeFromXml<CheckResponseDataDto>(response.Content);
                 if (result == null)
                 {
-                    return new CheckResponseDataDto
+                    return new CheckResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{check?.Account?.TxnType} işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
                     };
                 }
 
-                return new CheckResponseDataDto
+                return new CheckResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{check?.Account?.TxnType} işlemi başarılı."),
                     CheckResponse = result
@@ -164,7 +164,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
             catch (Exception ex)
             {
                 // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
-                return new CheckResponseDataDto
+                return new CheckResponseDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{check?.Account?.TxnType} işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
@@ -182,12 +182,12 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         /// Başarılı olması durumunda, `Result` alanı başarılı olarak döner. 
         /// Başarısız olması durumunda, hata kodu ve mesajı ile birlikte döner.
         /// </returns>
-        public RefundResponseDataDto Refund(RefundRequestDataDto refund)
+        public RefundResponseDto Refund(RefundRequestDto refund)
         {
             try
             {
                 // İade isteği için gerekli DTO'nun oluşturulması.
-                var dto = new RefundRequestDto
+                var dto = new RefundRequestDataDto
                 {
                     Currency = refund?.Order?.Currency,
                     Lang = refund?.Order?.Language,
@@ -207,23 +207,23 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
                 if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
                 {
-                    return new RefundResponseDataDto
+                    return new RefundResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{refund?.Account?.TxnType} işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
                     };
                 }
 
                 // API yanıtının deserialization işlemi.
-                var result = XmlHelper.DeserializeFromXml<RefundResponseDto>(response.Content);
+                var result = XmlHelper.DeserializeFromXml<RefundResponseDataDto>(response.Content);
                 if (result == null)
                 {
-                    return new RefundResponseDataDto
+                    return new RefundResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{refund?.Account?.TxnType} işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
                     };
                 }
 
-                return new RefundResponseDataDto
+                return new RefundResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{refund?.Account?.TxnType} işlemi başarılı."),
                     Response = result
@@ -232,7 +232,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
             catch (Exception ex)
             {
                 // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
-                return new RefundResponseDataDto
+                return new RefundResponseDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{refund?.Account?.TxnType} işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
@@ -251,7 +251,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         /// Başarılı olması durumunda, `Result` alanı başarılı olarak döner. 
         /// Başarısız olması durumunda, hata kodu ve mesajı ile birlikte döner.
         /// </returns>
-        public PaymentResponseDto Payment(PaymentRequestDataDto startPayment)
+        public PaymentResponseDto Payment(PaymentRequestDto startPayment)
         {
             try
             {
@@ -276,8 +276,8 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         /// </summary>
         /// <param name="threeDModel">3D Model ödeme isteğini temsil eden DTO. Kullanıcı bilgilerini, sipariş numarasını ve diğer gerekli bilgileri içerir.</param>
         /// <returns>
-        /// 3D Model ödeme işleminin sonucunu ve ilgili yanıt verilerini içeren bir <see cref="ThreeDModelPaymentResponseDataDto"/> nesnesi döner.
-        /// İşlem başarılıysa, <see cref="ThreeDModelPaymentResponseDto"/> nesnesi doldurulmuş olarak döner.
+        /// 3D Model ödeme işleminin sonucunu ve ilgili yanıt verilerini içeren bir <see cref="ThreeDModelPaymentResponseDto"/> nesnesi döner.
+        /// İşlem başarılıysa, <see cref="ThreeDModelPaymentResponseDataDto"/> nesnesi doldurulmuş olarak döner.
         /// İşlem başarısızsa veya bir hata oluşursa, ilgili hata mesajını içeren bir sonuç döner.
         /// </returns>
         /// <remarks>
@@ -286,7 +286,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         /// Yanıt başarılıysa, yanıt string'ini DTO'ya parse eder ve sonuç olarak döndürür.
         /// Eğer metot sırasında bir hata oluşursa, hata mesajını içeren bir sonuç döner.
         /// </remarks>
-        public ThreeDModelPaymentResponseDataDto ThreeDModelPayment(ThreeDModelPaymentRequestDto threeDModel)
+        public ThreeDModelPaymentResponseDto ThreeDModelPayment(ThreeDModelPaymentRequestDto threeDModel)
         {
             try
             {
@@ -303,24 +303,24 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
 
                 if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
                 {
-                    return new ThreeDModelPaymentResponseDataDto
+                    return new ThreeDModelPaymentResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"3D Model ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
                     };
                 }
 
-                var result = ResponseParser.ParseResponseToDto<ThreeDModelPaymentResponseDto>(response.Content);
+                var result = ResponseParser.ParseResponseToDto<ThreeDModelPaymentResponseDataDto>(response.Content);
 
                 if (result.ErrMsg != Results.Success)
                 {
-                    return new ThreeDModelPaymentResponseDataDto
+                    return new ThreeDModelPaymentResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, "3D Model ödeme işlemi başarısız."),
                         ThreeDModelPayment = result
                     };
                 }
 
-                return new ThreeDModelPaymentResponseDataDto
+                return new ThreeDModelPaymentResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, "3D Model ödeme işlemi başarılı."),
                     ThreeDModelPayment = result
@@ -329,7 +329,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
             catch (Exception ex)
             {
                 // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
-                return new ThreeDModelPaymentResponseDataDto
+                return new ThreeDModelPaymentResponseDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"3D Model ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
@@ -338,21 +338,21 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
 
         /// <summary>
         /// QNB Finansbank Sanal Pos üzerinde bir ön otorizasyon (Pre-Auth) işlemini sonlandırır.
-        /// Bu metot, verilen <see cref="PreAuthRequestDataDto"/> nesnesine göre işlemi başlatır ve sonuçları kontrol eder.
-        /// İşlem sonucu olarak <see cref="PreAuthResponseDataDto"/> nesnesi döner.
+        /// Bu metot, verilen <see cref="PreAuthRequestDto"/> nesnesine göre işlemi başlatır ve sonuçları kontrol eder.
+        /// İşlem sonucu olarak <see cref="PreAuthResponseDto"/> nesnesi döner.
         /// </summary>
-        /// <param name="preAuthRequest">Ön otorizasyon işlemini sonlandırmak için gerekli olan parametreleri içeren <see cref="PreAuthRequestDataDto"/> nesnesi.</param>
+        /// <param name="preAuthRequest">Ön otorizasyon işlemini sonlandırmak için gerekli olan parametreleri içeren <see cref="PreAuthRequestDto"/> nesnesi.</param>
         /// <returns>
-        /// İşlemin sonucunu ve ilgili bilgileri içeren <see cref="PreAuthResponseDataDto"/> nesnesi.
-        /// Başarılı olması durumunda, <see cref="PreAuthResponseDataDto.Result"/> alanı başarılı olarak döner.
+        /// İşlemin sonucunu ve ilgili bilgileri içeren <see cref="PreAuthResponseDto"/> nesnesi.
+        /// Başarılı olması durumunda, <see cref="PreAuthResponseDto.Result"/> alanı başarılı olarak döner.
         /// Başarısız olması durumunda, hata kodu ve mesajı ile birlikte döner.
         /// </returns>
-        public PreAuthResponseDataDto StopPreAuth(PreAuthRequestDataDto preAuthRequest)
+        public PreAuthResponseDto StopPreAuth(PreAuthRequestDto preAuthRequest)
         {
             try
             {
                 // Ödeme isteği için gerekli DTO'nun oluşturulması.
-                var dto = new PreAuthRequestDto
+                var dto = new PreAuthRequestDataDto
                 {
                     Currency = preAuthRequest?.Order?.Currency,
                     Lang = preAuthRequest?.Order?.Language,
@@ -377,23 +377,23 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
                 if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
                 {
-                    return new PreAuthResponseDataDto
+                    return new PreAuthResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{preAuthRequest?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
                     };
                 }
 
                 // API yanıtının deserialization işlemi.
-                var result = XmlHelper.DeserializeFromXml<PreAuthResponseDto>(response.Content);
+                var result = XmlHelper.DeserializeFromXml<PreAuthResponseDataDto>(response.Content);
                 if (result == null)
                 {
-                    return new PreAuthResponseDataDto
+                    return new PreAuthResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{preAuthRequest?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
                     };
                 }
 
-                return new PreAuthResponseDataDto
+                return new PreAuthResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{preAuthRequest?.Account?.SecureType} ödeme işlemi başarılı."),
                     PreAuthResponse = result
@@ -402,7 +402,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
             catch (Exception ex)
             {
                 // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
-                return new PreAuthResponseDataDto
+                return new PreAuthResponseDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{preAuthRequest?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
@@ -414,16 +414,16 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         /// </summary>
         /// <param name="rewardPointsRequestDto">Para puan sorgulama işlemi için gerekli olan tüm bilgileri içeren DTO nesnesi.</param>
         /// <returns>
-        /// İşlemin sonucunu ve ilgili bilgileri içeren <see cref="CheckRewardPointsResponseDataDto"/> nesnesi.
-        /// Başarılı olması durumunda, <see cref="CheckRewardPointsResponseDataDto.Result"/> alanı başarılı olarak döner.
+        /// İşlemin sonucunu ve ilgili bilgileri içeren <see cref="CheckRewardPointsResponseDto"/> nesnesi.
+        /// Başarılı olması durumunda, <see cref="CheckRewardPointsResponseDto.Result"/> alanı başarılı olarak döner.
         /// Başarısız olması durumunda, hata kodu ve mesajı ile birlikte döner.
         /// </returns>
-        public CheckRewardPointsResponseDataDto CheckRewardPoints(CheckRewardPointsRequestDataDto rewardPointsRequestDto)
+        public CheckRewardPointsResponseDto CheckRewardPoints(CheckRewardPointsRequestDto rewardPointsRequestDto)
         {
             try
             {
                 // Para puan sorgulama isteği için gerekli DTO'nun oluşturulması.
-                var dto = new CheckRewardPointsRequestDto
+                var dto = new CheckRewardPointsRequestDataDto
                 {
                     Currency = rewardPointsRequestDto?.Order?.Currency,
                     Lang = rewardPointsRequestDto?.Order?.Language,
@@ -442,23 +442,23 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
                 if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
                 {
-                    return new CheckRewardPointsResponseDataDto
+                    return new CheckRewardPointsResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{rewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
                     };
                 }
 
                 // API yanıtının deserialization işlemi.
-                var result = XmlHelper.DeserializeFromXml<CheckRewardPointsResponseDto>(response.Content);
+                var result = XmlHelper.DeserializeFromXml<CheckRewardPointsResponseDataDto>(response.Content);
                 if (result == null)
                 {
-                    return new CheckRewardPointsResponseDataDto
+                    return new CheckRewardPointsResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{rewardPointsRequestDto?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
                     };
                 }
 
-                return new CheckRewardPointsResponseDataDto
+                return new CheckRewardPointsResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{rewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarılı."),
                     Rewards = result
@@ -467,7 +467,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
             catch (Exception ex)
             {
                 // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
-                return new CheckRewardPointsResponseDataDto
+                return new CheckRewardPointsResponseDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{rewardPointsRequestDto?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
@@ -479,16 +479,16 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         /// </summary>
         /// <param name="useRewardPointsRequestDto">Para puan kullanımı için gerekli olan tüm bilgileri içeren DTO nesnesi.</param>
         /// <returns>
-        /// İşlemin sonucunu ve ilgili bilgileri içeren <see cref="UseRewardPointsResponseDataDto"/> nesnesi.
-        /// Başarılı olması durumunda, <see cref="UseRewardPointsResponseDataDto.Result"/> alanı başarılı olarak döner.
+        /// İşlemin sonucunu ve ilgili bilgileri içeren <see cref="UseRewardPointsResponseDto"/> nesnesi.
+        /// Başarılı olması durumunda, <see cref="UseRewardPointsResponseDto.Result"/> alanı başarılı olarak döner.
         /// Başarısız olması durumunda, hata kodu ve mesajı ile birlikte döner.
         /// </returns>
-        public UseRewardPointsResponseDataDto UseRewardPoints(UseRewardPointsRequestDataDto useRewardPointsRequestDto)
+        public UseRewardPointsResponseDto UseRewardPoints(UseRewardPointsRequestDto useRewardPointsRequestDto)
         {
             try
             {
                 // Para puan ödeme isteği için gerekli DTO'nun oluşturulması.
-                var dto = new UseRewardPointsRequestDto
+                var dto = new UseRewardPointsRequestDataDto
                 {
                     Currency = useRewardPointsRequestDto?.Order?.Currency,
                     Lang = useRewardPointsRequestDto?.Order?.Language,
@@ -512,23 +512,23 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
                 if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
                 {
-                    return new UseRewardPointsResponseDataDto
+                    return new UseRewardPointsResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{useRewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
                     };
                 }
 
                 // API yanıtının deserialization işlemi.
-                var result = XmlHelper.DeserializeFromXml<UseRewardPointsResponseDto>(response.Content);
+                var result = XmlHelper.DeserializeFromXml<UseRewardPointsResponseDataDto>(response.Content);
                 if (result == null)
                 {
-                    return new UseRewardPointsResponseDataDto
+                    return new UseRewardPointsResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{useRewardPointsRequestDto?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
                     };
                 }
 
-                return new UseRewardPointsResponseDataDto
+                return new UseRewardPointsResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{useRewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarılı."),
                     RewardPointsResponse = result
@@ -537,7 +537,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
             catch (Exception ex)
             {
                 // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
-                return new UseRewardPointsResponseDataDto
+                return new UseRewardPointsResponseDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{useRewardPointsRequestDto?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
@@ -549,19 +549,19 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         /// Bu yöntem, işlem geçmişi sorgulama parametrelerini alarak işlem sonucunu döner.
         /// </summary>
         /// <param name="historyRequestDataDto">
-        /// İşlem geçmişi sorgulama işlemi için gerekli olan parametreleri içeren bir <see cref="HistoryRequestDataDto"/> nesnesi.
+        /// İşlem geçmişi sorgulama işlemi için gerekli olan parametreleri içeren bir <see cref="HistoryRequestDto"/> nesnesi.
         /// Bu nesne, sorgulama işlemiyle ilgili hesap, sipariş ve tarih bilgilerini içerebilir.
         /// </param>
         /// <returns>
-        /// İşlemin sonucunu içeren bir <see cref="HistoryResponseDataDto"/> nesnesi döner.
+        /// İşlemin sonucunu içeren bir <see cref="HistoryResponseDto"/> nesnesi döner.
         /// Bu nesne, işlem geçmişi sorgulama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
-        public HistoryResponseDataDto History(HistoryRequestDataDto historyRequestDataDto)
+        public HistoryResponseDto History(HistoryRequestDto historyRequestDataDto)
         {
             try
             {
                 // İşlem geçmişi sorgulama isteği için gerekli DTO'nun oluşturulması.
-                var dto = new HistoryRequestDto
+                var dto = new HistoryRequestDataDto
                 {
                     Currency = historyRequestDataDto?.Order?.Currency,
                     Lang = historyRequestDataDto?.Order?.Language,
@@ -581,23 +581,23 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
                 if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
                 {
-                    return new HistoryResponseDataDto
+                    return new HistoryResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
                     };
                 }
 
                 // API yanıtının deserialization işlemi.
-                var result = XmlHelper.DeserializeFromXml<HistoryResponseDto>(response.Content);
+                var result = XmlHelper.DeserializeFromXml<HistoryResponseDataDto>(response.Content);
                 if (result == null)
                 {
-                    return new HistoryResponseDataDto
+                    return new HistoryResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
                     };
                 }
 
-                return new HistoryResponseDataDto
+                return new HistoryResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi başarılı."),
                     History = result
@@ -606,7 +606,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
             catch (Exception ex)
             {
                 // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
-                return new HistoryResponseDataDto
+                return new HistoryResponseDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
@@ -618,19 +618,19 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         /// Bu yöntem, toplu kapama parametrelerini alarak işlem sonucunu döner.
         /// </summary>
         /// <param name="batchCloseRequestData">
-        /// Toplu kapama işlemi için gerekli olan parametreleri içeren bir <see cref="BatchCloseRequestDataDto"/> nesnesi.
+        /// Toplu kapama işlemi için gerekli olan parametreleri içeren bir <see cref="BatchCloseRequestDto"/> nesnesi.
         /// Bu nesne, hesap ve işlemle ilgili bilgileri içerebilir.
         /// </param>
         /// <returns>
-        /// İşlemin sonucunu içeren bir <see cref="BatchCloseResponseDataDto"/> nesnesi döner.
+        /// İşlemin sonucunu içeren bir <see cref="BatchCloseResponseDto"/> nesnesi döner.
         /// Bu nesne, toplu kapama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
-        public BatchCloseResponseDataDto BatchClose(BatchCloseRequestDataDto batchCloseRequestData)
+        public BatchCloseResponseDto BatchClose(BatchCloseRequestDto batchCloseRequestData)
         {
             try
             {
                 // Toplu kapama isteği için gerekli DTO'nun oluşturulması.
-                var dto = new BatchCloseRequestDto
+                var dto = new BatchCloseRequestDataDto
                 {
                     MbrId = batchCloseRequestData?.Account?.MbrId,
                     MerchantID = batchCloseRequestData?.Account?.MerchantId,
@@ -647,23 +647,23 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
                 if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
                 {
-                    return new BatchCloseResponseDataDto
+                    return new BatchCloseResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{batchCloseRequestData?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
                     };
                 }
 
                 // API yanıtının deserialization işlemi.
-                var result = XmlHelper.DeserializeFromXml<BatchCloseResponseDto>(response.Content);
+                var result = XmlHelper.DeserializeFromXml<BatchCloseResponseDataDto>(response.Content);
                 if (result == null)
                 {
-                    return new BatchCloseResponseDataDto
+                    return new BatchCloseResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{batchCloseRequestData?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
                     };
                 }
 
-                return new BatchCloseResponseDataDto
+                return new BatchCloseResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{batchCloseRequestData?.Account?.SecureType} ödeme işlemi başarılı."),
                     BatchClose = result
@@ -672,7 +672,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
             catch (Exception ex)
             {
                 // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
-                return new BatchCloseResponseDataDto
+                return new BatchCloseResponseDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{batchCloseRequestData?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
@@ -684,19 +684,19 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         /// Bu yöntem, segment sorgulama parametrelerini alarak işlem sonucunu döner.
         /// </summary>
         /// <param name="segmentInquiryRequestDto">
-        /// Segment sorgulama işlemi için gerekli olan parametreleri içeren bir <see cref="SegmentInquiryRequestDataDto"/> nesnesi.
+        /// Segment sorgulama işlemi için gerekli olan parametreleri içeren bir <see cref="SegmentInquiryRequestDto"/> nesnesi.
         /// Bu nesne, sorgulama işlemiyle ilgili hesap, sipariş ve kart bilgilerini içerebilir.
         /// </param>
         /// <returns>
-        /// İşlemin sonucunu içeren bir <see cref="SegmentInquiryResponseDataDto"/> nesnesi döner.
+        /// İşlemin sonucunu içeren bir <see cref="SegmentInquiryResponseDto"/> nesnesi döner.
         /// Bu nesne, segment sorgulama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
-        public SegmentInquiryResponseDataDto SegmentInquiry(SegmentInquiryRequestDataDto segmentInquiryRequestDto)
+        public SegmentInquiryResponseDto SegmentInquiry(SegmentInquiryRequestDto segmentInquiryRequestDto)
         {
             try
             {
                 // Segment sorgulama isteği için gerekli DTO'nun oluşturulması.
-                var dto = new SegmentInquiryRequestDto
+                var dto = new SegmentInquiryRequestDataDto
                 {
                     MbrId = segmentInquiryRequestDto?.Account?.MbrId,
                     MerchantID = segmentInquiryRequestDto?.Account?.MerchantId,
@@ -714,23 +714,23 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
                 if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
                 {
-                    return new SegmentInquiryResponseDataDto
+                    return new SegmentInquiryResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{segmentInquiryRequestDto?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
                     };
                 }
 
                 // API yanıtının deserialization işlemi.
-                var result = XmlHelper.DeserializeFromXml<SegmentInquiryResponseDto>(response.Content);
+                var result = XmlHelper.DeserializeFromXml<SegmentInquiryResponseDataDto>(response.Content);
                 if (result == null)
                 {
-                    return new SegmentInquiryResponseDataDto
+                    return new SegmentInquiryResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{segmentInquiryRequestDto?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
                     };
                 }
 
-                return new SegmentInquiryResponseDataDto
+                return new SegmentInquiryResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{segmentInquiryRequestDto?.Account?.SecureType} ödeme işlemi başarılı."),
                     SegmentInquiryResponse = result
@@ -739,7 +739,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
             catch (Exception ex)
             {
                 // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
-                return new SegmentInquiryResponseDataDto
+                return new SegmentInquiryResponseDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{segmentInquiryRequestDto?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
@@ -751,7 +751,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         /// </summary>
         /// <param name="startPayment">Ödeme işlemi için gerekli olan tüm bilgileri içeren DTO nesnesi.</param>
         /// <returns>Ödeme işleminin sonucunu temsil eden <see cref="PaymentResponseDto"/> nesnesi.</returns>
-        private static PaymentResponseDto NonSecurePayment(PaymentRequestDataDto startPayment)
+        private static PaymentResponseDto NonSecurePayment(PaymentRequestDto startPayment)
         {
             try
             {
@@ -820,7 +820,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         /// </summary>
         /// <param name="startPayment">Ödeme işlemi için gerekli olan tüm bilgileri içeren DTO nesnesi.</param>
         /// <returns>Ödeme işleminin sonucunu temsil eden <see cref="PaymentResponseDto"/> nesnesi.</returns>
-        private static PaymentResponseDto ThreeDPayment(PaymentRequestDataDto? startPayment)
+        private static PaymentResponseDto ThreeDPayment(PaymentRequestDto? startPayment)
         {
             try
             {
