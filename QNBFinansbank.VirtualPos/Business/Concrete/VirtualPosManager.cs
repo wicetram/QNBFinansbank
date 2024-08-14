@@ -80,7 +80,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 }
 
                 // API yanıtının deserialization işlemi.
-                var result = XmlHelper.DeserializeFromXml<RefundResponseDto>(response.Content);
+                var result = XmlHelper.DeserializeFromXml<CancelResponseDto>(response.Content);
                 if (result == null)
                 {
                     return new CancelResponseDataDto
@@ -89,18 +89,10 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     };
                 }
 
-                // İşlemin başarı koduna göre sonuç döndürülmesi.
-                if (result.ProcReturnCode != "00")
-                {
-                    return new CancelResponseDataDto
-                    {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{cancel?.Account?.TxnType} işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
-                    };
-                }
-
                 return new CancelResponseDataDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{cancel?.Account?.TxnType} işlemi başarılı."),
+                    Cancel = result
                 };
             }
             catch (Exception ex)
@@ -159,16 +151,6 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     return new CheckResponseDataDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{check?.Account?.TxnType} işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
-                    };
-                }
-
-                // İşlemin başarı koduna göre sonuç döndürülmesi.
-                if (result.ProcReturnCode != "00")
-                {
-                    return new CheckResponseDataDto
-                    {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{check?.Account?.TxnType} işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
-                        CheckResponse = result
                     };
                 }
 
@@ -241,18 +223,10 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     };
                 }
 
-                // İşlemin başarı koduna göre sonuç döndürülmesi.
-                if (result.ProcReturnCode != "00")
-                {
-                    return new RefundResponseDataDto
-                    {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{refund?.Account?.TxnType} işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
-                    };
-                }
-
                 return new RefundResponseDataDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{refund?.Account?.TxnType} işlemi başarılı."),
+                    Response = result
                 };
             }
             catch (Exception ex)
@@ -419,16 +393,6 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     };
                 }
 
-                // İşlemin başarı koduna göre sonuç döndürülmesi.
-                if (result.ProcReturnCode != Results.Approved)
-                {
-                    return new PreAuthResponseDataDto
-                    {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{preAuthRequest?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
-                        PreAuthResponse = result
-                    };
-                }
-
                 return new PreAuthResponseDataDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{preAuthRequest?.Account?.SecureType} ödeme işlemi başarılı."),
@@ -491,16 +455,6 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     return new CheckRewardPointsResponseDataDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{rewardPointsRequestDto?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
-                    };
-                }
-
-                // İşlemin başarı koduna göre sonuç döndürülmesi.
-                if (result.ProcReturnCode != Results.Approved)
-                {
-                    return new CheckRewardPointsResponseDataDto
-                    {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{rewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
-                        Rewards = result
                     };
                 }
 
@@ -574,16 +528,6 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     };
                 }
 
-                // İşlemin başarı koduna göre sonuç döndürülmesi.
-                if (result.ProcReturnCode != Results.Approved)
-                {
-                    return new UseRewardPointsResponseDataDto
-                    {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{useRewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
-                        RewardPointsResponse = result
-                    };
-                }
-
                 return new UseRewardPointsResponseDataDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{useRewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarılı."),
@@ -653,16 +597,6 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     };
                 }
 
-                // İşlemin başarı koduna göre sonuç döndürülmesi.
-                if (result?.PaymentRequest?.ProcReturnCode != Results.Approved)
-                {
-                    return new HistoryResponseDataDto
-                    {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result?.PaymentRequest?.ProcReturnCode} | Hata Mesajı: {result?.PaymentRequest?.ErrMsg}"),
-                        History = result
-                    };
-                }
-
                 return new HistoryResponseDataDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi başarılı."),
@@ -726,16 +660,6 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     return new BatchCloseResponseDataDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{batchCloseRequestData?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
-                    };
-                }
-
-                // İşlemin başarı koduna göre sonuç döndürülmesi.
-                if (result?.ProcReturnCode != Results.Approved)
-                {
-                    return new BatchCloseResponseDataDto
-                    {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{batchCloseRequestData?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result?.ProcReturnCode} | Hata Mesajı: {result?.ErrMsg}"),
-                        BatchClose = result
                     };
                 }
 
@@ -806,16 +730,6 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     };
                 }
 
-                // İşlemin başarı koduna göre sonuç döndürülmesi.
-                if (result?.ProcReturnCode != Results.Approved)
-                {
-                    return new SegmentInquiryResponseDataDto
-                    {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{segmentInquiryRequestDto?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result?.ProcReturnCode} | Hata Mesajı: {result?.ErrMsg}"),
-                        SegmentInquiryResponse = result
-                    };
-                }
-
                 return new SegmentInquiryResponseDataDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{segmentInquiryRequestDto?.Account?.SecureType} ödeme işlemi başarılı."),
@@ -881,16 +795,6 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     return new PaymentResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{startPayment?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
-                        Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId)
-                    };
-                }
-
-                // İşlemin başarı koduna göre sonuç döndürülmesi.
-                if (result.ProcReturnCode != "00")
-                {
-                    return new PaymentResponseDto
-                    {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{startPayment?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
                         Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId)
                     };
                 }

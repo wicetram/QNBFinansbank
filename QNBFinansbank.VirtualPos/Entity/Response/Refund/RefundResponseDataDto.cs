@@ -7,5 +7,11 @@
         /// Bu nesne, geri ödeme işleminin başarı durumunu, işlem sonucunu ve varsa hata mesajlarını içerir.
         /// </summary>
         public ProcessResult? Result { get; set; }
+
+        /// <summary>
+        /// Geri ödeme işlemi ile ilgili detayları içeren bir <see cref="RefundResponseDto"/> nesnesi.
+        /// Bu nesne, geri ödeme işlemi hakkında spesifik bilgileri içerir, örneğin geri ödenen tutar ve diğer ilgili veriler.
+        /// </summary>
+        public RefundResponseDto? Response { get; set; }
     }
 }
