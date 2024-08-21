@@ -255,7 +255,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         {
             try
             {
-                if (startPayment?.Order?.PaymentSecurity == 0)
+                if (startPayment?.Order?.PaymentSecurity == false)
                 {
                     return NonSecurePayment(startPayment);
                 }

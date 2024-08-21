@@ -83,8 +83,8 @@
                 <div class="mb-3">
                     <label for="PaymentSecurity" class="form-label">Payment Security</label>
                     <InputSelect id="SecureType" class="form-control" @bind-Value="paymentRequestData.Order.PaymentSecurity">
-                        <option value="0">NonSecure</option>
-                        <option value="1" selected="selected">3D</option>
+                        <option value="false">NonSecure</option>
+                        <option value="true" selected="selected">3D</option>
                     </InputSelect>
                 </div>
                 <div class="mb-3">

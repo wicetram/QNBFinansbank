@@ -1,0 +1,175 @@
+﻿@page "/check"
+@using QNBFinansbank.VirtualPos.Entity.Response.Check
+@using System.Reflection
+
+@if (Success)
+{
+    <EditForm Model="@paymentRequestData" OnValidSubmit="HandleValidSubmit">
+        <div class="container">
+            <h2 class="mt-4">Payment Request Form</h2>
+            <div class="card mt-4">
+                <div class="card-header">Account Information</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="MbrId" class="form-label">Member ID</label>
+                        <InputText id="MbrId" class="form-control" @bind-Value="paymentRequestData.Account.MbrId" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="MerchantId" class="form-label">Merchant ID</label>
+                        <InputText id="MerchantId" class="form-control" @bind-Value="paymentRequestData.Account.MerchantId" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="MerchantPass" class="form-label">Merchant Password</label>
+                        <InputText id="MerchantPass" class="form-control" @bind-Value="paymentRequestData.Account.MerchantPass" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="UserCode" class="form-label">User Code</label>
+                        <InputText id="UserCode" class="form-control" @bind-Value="paymentRequestData.Account.UserCode" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="UserPass" class="form-label">User Pass</label>
+                        <InputText id="UserPass" class="form-control" @bind-Value="paymentRequestData.Account.UserPass" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="SecureType" class="form-label">Secure Type</label>
+                        <InputSelect id="SecureType" class="form-control" @bind-Value="paymentRequestData.Account.SecureType">
+                            <option value="">Select Secure Type</option>
+                            <option value="NonSecure">NonSecure</option>
+                            <option value="3DPay">3DPay</option>
+                            <option value="3DModel">3DModel</option>
+                            <option value="3DPayHosting">3DPayHosting</option>
+                            <option value="Report">Report</option>
+                            <option value="Inquiry">Inquiry</option>
+                        </InputSelect>
+                    </div>
+                    <div class="mb-3">
+                        <label for="TxnType" class="form-label">TxnType</label>
+                        <InputText id="TxnType" class="form-control" @bind-Value="paymentRequestData.Account.TxnType" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="BaseUrl" class="form-label">BaseUrl</label>
+                        <InputText id="BaseUrl" class="form-control" @bind-Value="paymentRequestData.Account.BaseUrl" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">Order Information</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="Installment" class="form-label">Installment</label>
+                        <InputText id="Installment" class="form-control" @bind-Value="paymentRequestData.Order.Installment" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Currency" class="form-label">Currency</label>
+                        <InputText id="Currency" class="form-control" @bind-Value="paymentRequestData.Order.Currency" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="ReturnUrl" class="form-label">Return URL</label>
+                        <InputText id="ReturnUrl" class="form-control" @bind-Value="paymentRequestData.Order.ReturnUrl" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="OrderId" class="form-label">Order Id</label>
+                        <div class="input-group">
+                            <InputText id="OrderId" class="form-control" @bind-Value="paymentRequestData.Order.OrderId" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Amount" class="form-label">Amount</label>
+                        <InputText id="Amount" class="form-control" @bind-Value="paymentRequestData.Order.Amount" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Language" class="form-label">Language</label>
+                        <InputText id="Language" class="form-control" @bind-Value="paymentRequestData.Order.Language" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="PaymentSecurity" class="form-label">Payment Security</label>
+                        <InputSelect id="SecureType" class="form-control" @bind-Value="paymentRequestData.Order.PaymentSecurity">
+                            <option value="false">NonSecure</option>
+                            <option value="true" selected="selected">3D</option>
+                        </InputSelect>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Random" class="form-label">Random</label>
+                        <div class="input-group">
+                            <InputText id="Random" class="form-control" @bind-Value="paymentRequestData.Order.Random" readonly="@isRandomReadonly" />
+                            <button type="button" class="btn btn-secondary" @onclick="GenerateRandomValue">Generate</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-4">Submit Payment</button>
+        </div>
+    </EditForm>
+}
+else
+{
+    <table class="table table-responsive">
+        <thead>
+            <tr>
+                <th>Result</th>
+                <th>Result Code</th>
+                <th>Result Message</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@(response?.Result?.Result == true ? "Başarılı" : "Başarısız")</td>
+                <td>@response?.Result?.ResultCode</td>
+                <td>@response?.Result?.ResultMessage</td>
+            </tr>
+        </tbody>
+    </table>
+
+    @if (response?.CheckResponse != null)
+    {
+        <table class="table table-responsive">
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var prop in response.CheckResponse.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    <tr>
+                        <td>@prop.Name</td>
+                        <td>@prop.GetValue(response.CheckResponse)?.ToString()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No data available.</p>
+    }
+}
+
+@code {
+    CheckResponseDto? response;
+    private CheckRequestDto paymentRequestData = new CheckRequestDto
+        {
+            Account = new AccountDto(),
+            Order = new OrderDto(),
+        };
+
+    private bool isRandomReadonly = false;
+    private bool Success = true;
+
+    private void HandleValidSubmit()
+    {
+        response = VirtualPos.Check(paymentRequestData);
+        Success = false;
+        StateHasChanged();
+    }
+
+    private void GenerateRandomValue()
+    {
+        paymentRequestData.Order.Random = Guid.NewGuid().ToString("N").Substring(0, 8);
+        isRandomReadonly = true;
+    }
+
+}

@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QNBFinansbank.VirtualPos", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QNBFinansbank.WebUI", "QNBFinansbank.WebUI\QNBFinansbank.WebUI.csproj", "{2ADED46E-36BD-481F-AC2F-E55DB37FC39A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QNBFinansbank.CashManagement", "QNBFinansbank.CashManagement\QNBFinansbank.CashManagement.csproj", "{02579966-F01C-424F-B855-C05EA9DD8697}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QNBFinansbank.CashManagement", "QNBFinansbank.CashManagement\QNBFinansbank.CashManagement.csproj", "{02579966-F01C-424F-B855-C05EA9DD8697}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
