@@ -1,4 +1,8 @@
-﻿using QNBFinansbank.VirtualPos.Business.Abstract;
+﻿using QNBFinansbank.CashManagement.Business.Abstract;
+using QNBFinansbank.CashManagement.Business.Concrete;
+using QNBFinansbank.MoneyTransfer.Business.Abstract;
+using QNBFinansbank.MoneyTransfer.Business.Concrete;
+using QNBFinansbank.VirtualPos.Business.Abstract;
 using QNBFinansbank.VirtualPos.Business.Concrete;
 using QNBFinansbank.WebUI.Components;
 
@@ -14,6 +18,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddRazorPages().WithRazorPagesRoot("/Components/Pages/Callback");
 
 builder.Services.AddSingleton<IVirtualPosService, VirtualPosManager>();
+builder.Services.AddSingleton<ICashManagementService, CashManagementManager>();
+builder.Services.AddSingleton<IMoneyTransferService, MoneyTransferManager>();
 
 var app = builder.Build();
 

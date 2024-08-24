@@ -17,5 +17,11 @@
         /// Bu nesne, para puan sorgulama işlemi sonucunda dönen tüm verileri içerir.
         /// </summary>
         public CheckRewardPointsResponseDataDto? Rewards { get; set; }
+
+        /// <summary>
+        /// Para puan sorgulama işlemine ait istek ve cevabı içerir
+        /// Bu alan, işleme ait request ve response gibi bilgileri içerir
+        /// </summary>
+        public ApiLogDto? ApiLog { get; set; }
     }
 }

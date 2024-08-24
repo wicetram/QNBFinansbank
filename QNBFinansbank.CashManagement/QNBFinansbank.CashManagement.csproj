@@ -7,10 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Utility\ApiClient\" />
+    <Compile Remove="Utility\ApiClient\**" />
+    <EmbeddedResource Remove="Utility\ApiClient\**" />
+    <None Remove="Utility\ApiClient\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="RestSharp" Version="111.4.1" />
   </ItemGroup>
 

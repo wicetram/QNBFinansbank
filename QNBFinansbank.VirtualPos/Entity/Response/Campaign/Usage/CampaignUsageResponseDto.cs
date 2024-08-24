@@ -3,5 +3,6 @@
     public class CampaignUsageResponseDto : IDto
     {
         public ProcessResult? Result { get; set; }
+        public ApiLogDto? ApiLog { get; set; }
     }
 }

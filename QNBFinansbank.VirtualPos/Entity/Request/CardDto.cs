@@ -1,5 +1,9 @@
 ﻿namespace QNBFinansbank.VirtualPos.Entity.Request
 {
+    /// <summary>
+    /// Kredi veya banka kartı bilgilerini temsil eden DTO sınıfı.
+    /// Bu sınıf, kart numarası, kart sahibi adı, CVC/CVV kodu, son kullanım tarihi ve diğer kartla ilgili bilgileri içerir.
+    /// </summary>
     public class CardDto : IDto
     {
         /// <summary>
@@ -24,11 +28,18 @@
         public string? CVC { get; set; }
 
         /// <summary>
-        /// Kartın son kullanım tarihi.
-        /// Bu tarih, kartın geçerliliğinin sona erdiği tarihi belirtir ve genellikle MM/YY formatında olur.
+        /// Kartın son kullanım yılı.
+        /// Bu tarih, kartın geçerliliğinin sona erdiği tarihi belirtir ve genellikle YYYY formatında olur.
         /// Varsayılan değer olarak <c>null</c> olabilir.
         /// </summary>
-        public string? ExpireDate { get; set; }
+        public string? ExpireYear { get; set; }
+
+        /// <summary>
+        /// Kartın son kullanım ayı.
+        /// Bu tarih, kartın geçerliliğinin sona erdiği tarihi belirtir ve genellikle MM formatında olur.
+        /// Varsayılan değer olarak <c>null</c> olabilir.
+        /// </summary>
+        public string? ExpireMonth { get; set; }
 
         /// <summary>
         /// Kart sahibinin email adresi.

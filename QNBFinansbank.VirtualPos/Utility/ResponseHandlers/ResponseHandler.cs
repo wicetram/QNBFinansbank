@@ -1,4 +1,5 @@
 ﻿using QNBFinansbank.VirtualPos.Entity.Response;
+using QNBFinansbank.VirtualPos.Entity.Response.Payment;
 
 namespace QNBFinansbank.VirtualPos.Utility.ResponseHandlers
 {

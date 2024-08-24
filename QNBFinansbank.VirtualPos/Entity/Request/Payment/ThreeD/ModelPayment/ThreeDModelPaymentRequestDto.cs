@@ -36,6 +36,11 @@
         /// </summary>
         public string? RequestGuid { get; set; }
 
+        /// <summary>
+        /// Banka linki. 
+        /// Bu URL, sanal pos işlemlerinin gerçekleştirileceği banka sistemine bağlantı sağlar.
+        /// Varsayılan değer olarak <c>null</c> olabilir.
+        /// </summary>
         public string? BaseUrl { get; set; }
     }
 }

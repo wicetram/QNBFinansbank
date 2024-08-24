@@ -1,0 +1,224 @@
+﻿@page "/money-transfer"
+
+@using QNBFinansbank.MoneyTransfer.Business.Abstract;
+@using QNBFinansbank.MoneyTransfer.Entity.Request.Transfer;
+@using QNBFinansbank.MoneyTransfer.Entity.Response.Transfer;
+@inject IMoneyTransferService Money;
+
+@if (Success)
+{
+    <EditForm Model="@paymentRequestData" OnValidSubmit="HandleValidSubmit">
+        <div class="container">
+            <h2 class="mt-4">Money Transfer Request Form</h2>
+            <div class="card mt-4">
+                <div class="card-header">Account Information</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="Username" class="form-label">Username</label>
+                        <InputText id="Username" class="form-control" @bind-Value="paymentRequestData.Account.Username" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Password" class="form-label">Password</label>
+                        <InputText id="Password" class="form-control" @bind-Value="paymentRequestData.Account.Password" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="CustomerNo" class="form-label">CustomerNo</label>
+                        <InputText id="CustomerNo" class="form-control" @bind-Value="paymentRequestData.Account.CustomerNo" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="FirmCode" class="form-label">FirmCode</label>
+                        <InputText id="FirmCode" class="form-control" @bind-Value="paymentRequestData.Account.FirmCode" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="AccountCode" class="form-label">AccountCode</label>
+                        <InputText id="AccountCode" class="form-control" @bind-Value="paymentRequestData.Account.AccountCode" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="BankCode" class="form-label">BankCode</label>
+                        <InputText id="BankCode" class="form-control" @bind-Value="paymentRequestData.Account.BankCode" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="BranchCode" class="form-label">BranchCode</label>
+                        <InputText id="BranchCode" class="form-control" @bind-Value="paymentRequestData.Account.BranchCode" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Suffix" class="form-label">Suffix</label>
+                        <InputText id="Suffix" class="form-control" @bind-Value="paymentRequestData.Account.Suffix" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Currency" class="form-label">Currency</label>
+                        <InputText id="Currency" class="form-control" @bind-Value="paymentRequestData.Account.Currency" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="IP" class="form-label">IP</label>
+                        <InputText id="IP" class="form-control" @bind-Value="paymentRequestData.Account.IP" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="BaseUrl" class="form-label">BaseUrl</label>
+                        <InputText id="BaseUrl" class="form-control" @bind-Value="paymentRequestData.Account.BaseUrl" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Action" class="form-label">Action</label>
+                        <InputText id="Action" class="form-control" @bind-Value="paymentRequestData.Account.Action" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">Receiver Information</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="FullName" class="form-label">FullName</label>
+                        <InputText id="FullName" class="form-control" @bind-Value="paymentRequestData.Receiver.FullName" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Iban" class="form-label">Iban</label>
+                        <InputText id="Iban" class="form-control" @bind-Value="paymentRequestData.Receiver.Iban" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="ReceiverBankCode" class="form-label">ReceiverBankCode</label>
+                        <InputText id="ReceiverBankCode" class="form-control" @bind-Value="paymentRequestData.Receiver.ReceiverBankCode" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">Sender Information</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="BirthPlace" class="form-label">BirthPlace</label>
+                        <InputText id="BirthPlace" class="form-control" @bind-Value="paymentRequestData.Sender.BirthPlace" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Birthday" class="form-label">Birthday</label>
+                        <InputText id="Birthday" class="form-control" @bind-Value="paymentRequestData.Sender.Birthday" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="NameSurname" class="form-label">NameSurname</label>
+                        <InputText id="NameSurname" class="form-control" @bind-Value="paymentRequestData.Sender.NameSurname" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Phone" class="form-label">Phone</label>
+                        <InputText id="Phone" class="form-control" @bind-Value="paymentRequestData.Sender.Phone" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="CitizenNo" class="form-label">CitizenNo</label>
+                        <InputText id="CitizenNo" class="form-control" @bind-Value="paymentRequestData.Sender.CitizenNo" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Passport" class="form-label">Passport</label>
+                        <InputText id="Passport" class="form-control" @bind-Value="paymentRequestData.Sender.Passport" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Address" class="form-label">Address</label>
+                        <InputText id="Address" class="form-control" @bind-Value="paymentRequestData.Sender.Address" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Country" class="form-label">Country</label>
+                        <InputText id="Country" class="form-control" @bind-Value="paymentRequestData.Sender.Country" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">Transfer Information</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="RequestId" class="form-label">RequestId</label>
+                        <InputText id="RequestId" class="form-control" @bind-Value="paymentRequestData.Transfer.RequestId" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Amount" class="form-label">Amount</label>
+                        <InputNumber id="Amount" class="form-control" @bind-Value="paymentRequestData.Transfer.Amount" @bind-Value:format="N" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Description" class="form-label">Description</label>
+                        <InputText id="Description" class="form-control" @bind-Value="paymentRequestData.Transfer.Description" />
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-4">Transfer</button>
+        </div>
+    </EditForm>
+}
+else
+{
+    @if (response != null && response.Result != null)
+    {
+        <table class="table table-responsive">
+            <thead>
+                <tr>
+                    <th>Result</th>
+                    <th>Result Code</th>
+                    <th>Result Message</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@(response.Result.Result ? "Başarılı" : "Başarısız")</td>
+                    <td>@response.Result.ResultCode</td>
+                    <td>@response.Result.ResultMessage</td>
+                </tr>
+            </tbody>
+        </table>
+
+        @if (response.Transfer != null)
+        {
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+                        <th>Slip Number</th>
+                        <th>Result Code</th>
+                        <th>Result Description</th>
+                        <th>Inquiry Number</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@response.Transfer.SlipNumber</td>
+                        <td>@response.Transfer.ResultCode</td>
+                        <td>@response.Transfer.ResultDescription</td>
+                        <td>@response.Transfer.InquiryNumber</td>
+                    </tr>
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No transactions found.</p>
+        }
+    }
+    else
+    {
+        <p>Loading...</p>
+    }
+}
+
+@code {
+    TransferResponseDto? response;
+
+    private bool Success = true;
+
+    TransferRequestDto paymentRequestData = new TransferRequestDto
+        {
+            Account = new QNBFinansbank.MoneyTransfer.Entity.Request.AccountDto(),
+            Receiver = new QNBFinansbank.MoneyTransfer.Entity.Request.ReceiverDto(),
+            Sender = new QNBFinansbank.MoneyTransfer.Entity.Request.SenderDto(),
+            Transfer = new QNBFinansbank.MoneyTransfer.Entity.Request.TransferDto(),
+        };
+
+    private void HandleValidSubmit()
+    {
+        if (paymentRequestData?.Receiver?.Iban?.StartsWith("TR") == true)
+        {
+            response = Money.IBANMoneyTransfer(paymentRequestData);
+        }
+        else
+        {
+            response = Money.CreditCardMoneyTransfer(paymentRequestData);
+        }
+        Success = false;
+        StateHasChanged();
+    }
+}

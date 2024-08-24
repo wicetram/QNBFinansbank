@@ -1,5 +1,9 @@
 ﻿namespace QNBFinansbank.VirtualPos.Entity.Request
 {
+    /// <summary>
+    /// Sanal POS işlemlerinde kullanılan hesap bilgilerini temsil eden DTO sınıfı.
+    /// Bu sınıf, kullanıcı adı, şifre, müşteri kimliği, mağaza anahtarı ve diğer işlemle ilgili bilgileri içerir.
+    /// </summary>
     public class AccountDto : IDto
     {
         /// <summary>

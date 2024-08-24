@@ -1,0 +1,216 @@
+﻿@page "/check-money-transfer"
+
+@using QNBFinansbank.MoneyTransfer.Business.Abstract;
+@using QNBFinansbank.MoneyTransfer.Entity.Request.Check
+@using QNBFinansbank.MoneyTransfer.Entity.Response.Check
+@inject IMoneyTransferService Money;
+
+@if (Success)
+{
+    <EditForm Model="@paymentRequestData" OnValidSubmit="HandleValidSubmit">
+        <div class="container">
+            <h2 class="mt-4">Money Transfer Request Form</h2>
+            <div class="card mt-4">
+                <div class="card-header">Account Information</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="Username" class="form-label">Username</label>
+                        <InputText id="Username" class="form-control" @bind-Value="paymentRequestData.Account.Username" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Password" class="form-label">Password</label>
+                        <InputText id="Password" class="form-control" @bind-Value="paymentRequestData.Account.Password" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="CustomerNo" class="form-label">CustomerNo</label>
+                        <InputText id="CustomerNo" class="form-control" @bind-Value="paymentRequestData.Account.CustomerNo" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="FirmCode" class="form-label">FirmCode</label>
+                        <InputText id="FirmCode" class="form-control" @bind-Value="paymentRequestData.Account.FirmCode" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="AccountCode" class="form-label">AccountCode</label>
+                        <InputText id="AccountCode" class="form-control" @bind-Value="paymentRequestData.Account.AccountCode" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="BankCode" class="form-label">BankCode</label>
+                        <InputText id="BankCode" class="form-control" @bind-Value="paymentRequestData.Account.BankCode" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="BranchCode" class="form-label">BranchCode</label>
+                        <InputText id="BranchCode" class="form-control" @bind-Value="paymentRequestData.Account.BranchCode" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Suffix" class="form-label">Suffix</label>
+                        <InputText id="Suffix" class="form-control" @bind-Value="paymentRequestData.Account.Suffix" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Currency" class="form-label">Currency</label>
+                        <InputText id="Currency" class="form-control" @bind-Value="paymentRequestData.Account.Currency" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="IP" class="form-label">IP</label>
+                        <InputText id="IP" class="form-control" @bind-Value="paymentRequestData.Account.IP" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="BaseUrl" class="form-label">BaseUrl</label>
+                        <InputText id="BaseUrl" class="form-control" @bind-Value="paymentRequestData.Account.BaseUrl" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Action" class="form-label">Action</label>
+                        <InputText id="Action" class="form-control" @bind-Value="paymentRequestData.Account.Action" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">Receiver Information</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="RequestId" class="form-label">RequestId</label>
+                        <InputText id="RequestId" class="form-control" @bind-Value="paymentRequestData.RequestId" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="BankReference" class="form-label">BankReference</label>
+                        <InputText id="BankReference" class="form-control" @bind-Value="paymentRequestData.BankReference" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="BankQueryNumber" class="form-label">BankQueryNumber</label>
+                        <InputText id="BankQueryNumber" class="form-control" @bind-Value="paymentRequestData.BankQueryNumber" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="AccountingReference" class="form-label">AccountingReference</label>
+                        <InputText id="AccountingReference" class="form-control" @bind-Value="paymentRequestData.AccountingReference" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="StartDate" class="form-label">StartDate</label>
+                        <InputDate id="StartDate" class="form-control" @bind-Value="paymentRequestData.StartDate" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="EndDate" class="form-label">EndDate</label>
+                        <InputDate id="EndDate" class="form-control" @bind-Value="paymentRequestData.EndDate" />
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-4">Check</button>
+        </div>
+    </EditForm>
+}
+else
+{
+    @if (response != null && response.Result != null)
+    {
+        <table class="table table-responsive">
+            <thead>
+                <tr>
+                    <th>Result</th>
+                    <th>Result Code</th>
+                    <th>Result Message</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@(response.Result.Result ? "Başarılı" : "Başarısız")</td>
+                    <td>@response.Result.ResultCode</td>
+                    <td>@response.Result.ResultMessage</td>
+                </tr>
+            </tbody>
+        </table>
+
+        @if (response.CheckTransferResponse != null && response.CheckTransferResponse.TableList != null && response.CheckTransferResponse.TableList.Count > 0)
+        {
+            <h3>Transfer Details</h3>
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+                        <th>Receiver Regional Status</th>
+                        <th>Superior Name</th>
+                        <th>Superior Birth Date</th>
+                        <th>Amount</th>
+                        <th>Address</th>
+                        <th>Slip Number</th>
+                        <th>Receiver Name</th>
+                        <th>Result Code</th>
+                        <th>Description</th>
+                        <th>Account Number</th>
+                        <th>Inquiry Number</th>
+                        <th>Packed Id</th>
+                        <th>Firm Reference Number</th>
+                        <th>Upload Date</th>
+                        <th>Pid No</th>
+                        <th>Target Bank Code</th>
+                        <th>Currency</th>
+                        <th>Target Account</th>
+                        <th>Result Description</th>
+                        <th>Payment Category Detail</th>
+                        <th>Target Branch Code</th>
+                        <th>Transaction Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var tableItem in response.CheckTransferResponse.TableList)
+                    {
+                        <tr>
+                            <td>@tableItem?.ReceiverRegionalStatus</td>
+                            <td>@tableItem?.SuperiorName</td>
+                            <td>@tableItem?.SuperiorBirthDate</td>
+                            <td>@tableItem?.Amount</td>
+                            <td>@tableItem?.Address</td>
+                            <td>@tableItem?.SlipNumber</td>
+                            <td>@tableItem?.ReceiverName</td>
+                            <td>@tableItem?.ResultCode</td>
+                            <td>@tableItem?.Description</td>
+                            <td>@tableItem?.AccountNumber</td>
+                            <td>@tableItem?.InquiryNumber</td>
+                            <td>@tableItem?.PackedId</td>
+                            <td>@tableItem?.FirmReferansNumber</td>
+                            <td>@tableItem?.UploadDate</td>
+                            <td>@tableItem?.PidNo</td>
+                            <td>@tableItem?.TargetBankCode</td>
+                            <td>@tableItem?.Currency</td>
+                            <td>@tableItem?.TargetAccount</td>
+                            <td>@tableItem?.ResultDescription</td>
+                            <td>@tableItem?.PaymentCategoryDetail</td>
+                            <td>@tableItem?.TargetBranchCode</td>
+                            <td>@tableItem?.TransactionDate</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No transactions found.</p>
+        }
+    }
+    else
+    {
+        <p>Loading...</p>
+    }
+}
+
+@code {
+    CheckTransferResponseDto? response;
+
+    private bool Success = true;
+
+    CheckTransferRequestDto paymentRequestData = new CheckTransferRequestDto
+        {
+            Account = new QNBFinansbank.MoneyTransfer.Entity.Request.AccountDto(),
+            AccountingReference = string.Empty,
+            BankQueryNumber = string.Empty,
+            BankReference = string.Empty,
+            RequestId = string.Empty,
+            StartDate = DateTime.Now,
+            EndDate = DateTime.Now
+        };
+
+    private void HandleValidSubmit()
+    {
+        response = Money.Check(paymentRequestData);
+        Success = false;
+        StateHasChanged();
+    }
+}

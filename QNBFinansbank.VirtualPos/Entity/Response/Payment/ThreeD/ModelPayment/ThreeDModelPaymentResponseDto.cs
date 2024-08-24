@@ -17,5 +17,11 @@
         /// Bu nesne, işlemin ayrıntılı yanıt verilerini kapsar.
         /// </summary>
         public ThreeDModelPaymentResponseDataDto? ThreeDModelPayment { get; set; }
+
+        /// <summary>
+        /// 3D Model Payment işlemine ait istek ve cevabı içerir
+        /// Bu alan, işleme ait request ve response gibi bilgileri içerir
+        /// </summary>
+        public ApiLogDto? ApiLog { get; set; }
     }
 }

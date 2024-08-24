@@ -1,5 +1,9 @@
 ﻿namespace QNBFinansbank.VirtualPos.Entity.Request
 {
+    /// <summary>
+    /// Ödeme işlemi ile ilgili sipariş bilgilerini temsil eden DTO sınıfı.
+    /// Bu sınıf, taksit sayısı, kur bilgisi, ödeme miktarı gibi ödeme işlemiyle ilişkili çeşitli bilgileri içerir.
+    /// </summary>
     public class OrderDto : IDto
     {
         /// <summary>
@@ -58,7 +62,7 @@
         /// Bu özellik, ödeme işleminin güvenlik seviyesini belirtir. Örneğin, <c>false</c> (NonSecure), <c>true</c> (3D Secure) gibi değerler alabilir.
         /// Varsayılan değeri <c>true</c> olarak ayarlıdır.
         /// </summary>
-        public bool PaymentSecurity { get; set; } = true;
+        public bool? PaymentSecurity { get; set; } = true;
 
         /// <summary>
         /// Rastgele değer. 

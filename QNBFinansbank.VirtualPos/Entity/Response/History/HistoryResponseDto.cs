@@ -17,5 +17,11 @@
         /// Bu nesne, sorgulanan işlem geçmişi ile ilgili tüm detayları barındırır.
         /// </summary>
         public HistoryResponseDataDto? History { get; set; }
+
+        /// <summary>
+        /// İşlem geçmişi işlemine ait istek ve cevabı içerir
+        /// Bu alan, işleme ait request ve response gibi bilgileri içerir
+        /// </summary>
+        public ApiLogDto? ApiLog { get; set; }
     }
 }

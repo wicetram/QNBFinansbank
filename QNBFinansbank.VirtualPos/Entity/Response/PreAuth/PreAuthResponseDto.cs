@@ -17,5 +17,11 @@
         /// Bu alan, ön otorizasyon işlemi ile ilgili dönen verileri içerir.
         /// </summary>
         public PreAuthResponseDataDto? PreAuthResponse { get; set; }
+
+        /// <summary>
+        /// Ön otorizasyon işlemine ait istek ve cevabı içerir
+        /// Bu alan, işleme ait request ve response gibi bilgileri içerir
+        /// </summary>
+        public ApiLogDto? ApiLog { get; set; }
     }
 }

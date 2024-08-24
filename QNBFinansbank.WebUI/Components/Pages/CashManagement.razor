@@ -1,0 +1,198 @@
+﻿@page "/cash-management"
+@using QNBFinansbank.CashManagement.Business.Abstract
+@using QNBFinansbank.CashManagement.Entity.Request.GetTransaction
+@using QNBFinansbank.CashManagement.Entity.Response.GetTransaction
+@inject ICashManagementService _CashManagement
+
+@if (Success)
+{
+    <EditForm Model="@paymentRequestData" OnValidSubmit="HandleValidSubmit">
+        <div class="container">
+            <h2 class="mt-4">Cash Management Request Form</h2>
+            <div class="card mt-4">
+                <div class="card-header">Account Information</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="Username" class="form-label">Username</label>
+                        <InputText id="Username" class="form-control" @bind-Value="paymentRequestData.Account.Username" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Password" class="form-label">Password</label>
+                        <InputText id="Password" class="form-control" @bind-Value="paymentRequestData.Account.Password" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="AccountNo" class="form-label">AccountNo</label>
+                        <InputText id="AccountNo" class="form-control" @bind-Value="paymentRequestData.Account.AccountNo" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="UserCode" class="form-label">IBAN</label>
+                        <InputText id="IBAN" class="form-control" @bind-Value="paymentRequestData.Account.IBAN" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="BaseUrl" class="form-label">BaseUrl</label>
+                        <InputText id="BaseUrl" class="form-control" @bind-Value="paymentRequestData.Account.BaseUrl" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="ActionUrl" class="form-label">ActionUrl</label>
+                        <InputText id="ActionUrl" class="form-control" @bind-Value="paymentRequestData.Account.Action" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">Order Information</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="StartDate" class="form-label">StartDate</label>
+                        <InputDate id="StartDate" class="form-control" @bind-Value="paymentRequestData.TransactionInfo.StartDate" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="EndDate" class="form-label">Currency</label>
+                        <InputDate id="EndDate" class="form-control" @bind-Value="paymentRequestData.TransactionInfo.EndDate" />
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-4">Get Transactions</button>
+        </div>
+    </EditForm>
+}
+else
+{
+    @if (response != null && response.Result != null)
+    {
+        @if (response.Result.Result)
+        {
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+                        <th>Result</th>
+                        <th>Result Code</th>
+                        <th>Result Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@(response.Result.Result ? "Başarılı" : "Başarısız")</td>
+                        <td>@response.Result.ResultCode</td>
+                        <td>@response.Result.ResultMessage</td>
+                    </tr>
+                </tbody>
+            </table>
+            @if (response.Transaction != null && response.Transaction.Datas != null && response.Transaction.Datas.Count > 0)
+            {
+                <table class="table table-responsive">
+                    <thead>
+                        <tr>
+                            <th>Error Code</th>
+                            <th>Error Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>@response.Transaction.ErrorCode</td>
+                            <td>@response.Transaction.ErrorDescription</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table class="table table-responsive">
+                    <thead>
+                        <tr>
+                            <th>Transaction Date</th>
+                            <th>Transaction Amount</th>
+                            <th>Transaction Description</th>
+                            <th>Receiver IBAN</th>
+                            <th>Balance After Transaction</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var data in response.Transaction.Datas)
+                        {
+                            <tr>
+                                <td>@Convert.ToDateTime(data.TransactionDate).ToString("dd.MM.yyyy")</td>
+                                <td>@Convert.ToDecimal(data.TransactionAmount).ToString("C2")</td>
+                                <td>@data.TransactionDescription</td>
+                                <td>@data.ReceiverIBAN</td>
+                                <td>@Convert.ToDecimal(data.BalanceAfterTransaction).ToString("C2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p>No transactions found.</p>
+            }
+        }
+        else
+        {
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+                        <th>Result</th>
+                        <th>Result Code</th>
+                        <th>Result Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@(response.Result.Result ? "Başarılı" : "Başarısız")</td>
+                        <td>@response.Result.ResultCode</td>
+                        <td>@response.Result.ResultMessage</td>
+                    </tr>
+                </tbody>
+            </table>
+        }
+    }
+    else
+    {
+        <p>Loading...</p>
+    }
+}
+
+@code {
+    GetTransactionResponseDto? response;
+
+    GetTransactionRequestDto paymentRequestData = new GetTransactionRequestDto
+        {
+            Account = new QNBFinansbank.CashManagement.Entity.Request.AccountDto(),
+            TransactionInfo = new QNBFinansbank.CashManagement.Entity.Request.TransactionInfoDto()
+        };
+
+    private bool Success = true;
+
+    private void HandleValidSubmit()
+    {
+        response = _CashManagement.GetTransaction(paymentRequestData);
+        if (response != null)
+        {
+            Success = false;
+        }
+        StateHasChanged();
+    }
+
+    // protected override void OnInitialized()
+    // {
+    //     var request = new GetTransactionRequestDto
+    //         {
+    //             Account = new QNBFinansbank.CashManagement.Entity.Request.AccountDto
+    //             {
+    //                 Username = "FOYWS",
+    //                 Password = "N(n7U5aZ",
+    //                 AccountNo = "134180788",
+    //                 IBAN = "TR870011100000000134180788",
+    //                 BaseUrl = "https://fbmaestro.finansbank.com.tr/MaestroCoreEkstre/services/FoyService.FoyServiceHttpSoap12Endpoint/",
+    //                 ActionUrl = "urn:getTransactionInfo"
+    //             },
+    //             TransactionInfo = new QNBFinansbank.CashManagement.Entity.Request.TransactionInfoDto
+    //             {
+    //                 StartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1),
+    //                 EndDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15),
+    //             }
+    //         };
+
+    //     response = _CashManagement.GetTransaction(request);
+    //     base.OnInitialized();
+    // }
+}

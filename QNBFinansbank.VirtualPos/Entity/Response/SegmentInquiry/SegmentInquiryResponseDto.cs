@@ -16,5 +16,11 @@
         /// Bu alan, segment sorgulama işleminin sonucuna ait detayları içerir.
         /// </summary>
         public SegmentInquiryResponseDataDto? SegmentInquiryResponse { get; set; }
+
+        /// <summary>
+        /// Segment sorgulama işlemine ait istek ve cevabı içerir
+        /// Bu alan, işleme ait request ve response gibi bilgileri içerir
+        /// </summary>
+        public ApiLogDto? ApiLog { get; set; }
     }
 }

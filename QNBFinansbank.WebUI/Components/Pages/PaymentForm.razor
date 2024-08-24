@@ -113,8 +113,12 @@
                     <InputText id="CVC" class="form-control" @bind-Value="paymentRequestData.Card.CVC" />
                 </div>
                 <div class="mb-3">
-                    <label for="ExpireDate" class="form-label">Expire Date</label>
-                    <InputText id="ExpireDate" class="form-control" @bind-Value="paymentRequestData.Card.ExpireDate" />
+                    <label for="ExpireMonth" class="form-label">Expire Month</label>
+                    <InputText id="ExpireMonth" class="form-control" @bind-Value="paymentRequestData.Card.ExpireMonth" />
+                </div>
+                <div class="mb-3">
+                    <label for="ExpireYear" class="form-label">Expire Year</label>
+                    <InputText id="ExpireYear" class="form-control" @bind-Value="paymentRequestData.Card.ExpireYear" />
                 </div>
                 <div class="mb-3">
                     <label for="Email" class="form-label">Email</label>
@@ -123,22 +127,61 @@
             </div>
         </div>
 
-        <div class="card mt-4" style="display:none">
+        <div class="card mt-4">
             <div class="card-header">Submerchant Information</div>
             <div class="card-body">
                 <div class="mb-3">
                     <label for="SubmerchantId" class="form-label">Submerchant ID</label>
-                    <InputText id="SubmerchantId" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubmerchantId" />
+                    <InputText id="SubmerchantId" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubmerchantIdCode" />
                 </div>
                 <div class="mb-3">
                     <label for="SubmerchantName" class="form-label">Submerchant Name</label>
                     <InputText id="SubmerchantName" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubmerchantName" />
                 </div>
                 <div class="mb-3">
-                    <label for="SubmerchantIn" class="form-label">Submerchant URL</label>
-                    <InputText id="SubmerchantIn" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubmerchantIn" />
+                    <label for="SubmerchantIn" class="form-label">Submerchant TCKN/VKN</label>
+                    <InputText id="SubmerchantIn" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubMerchantIn" />
                 </div>
-                <!-- Diğer SubmerchantDto özellikleri için form elemanları buraya eklenir -->
+                <div class="mb-3">
+                    <label for="SubMerchantUrl" class="form-label">Submerchant MCC URL</label>
+                    <InputText id="SubMerchantUrl" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubMerchantUrl" />
+                </div>
+                <div class="mb-3">
+                    <label for="SubMerchantNumber" class="form-label">Submerchant Number</label>
+                    <InputText id="SubMerchantNumber" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubMerchantNumber" />
+                </div>
+                <div class="mb-3">
+                    <label for="SubMerchantBddkCode" class="form-label">Submerchant BDDK Code</label>
+                    <InputText id="SubMerchantBddkCode" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubMerchantBddkCode" />
+                </div>
+                <div class="mb-3">
+                    <label for="SubMerchantMcc" class="form-label">Submerchant MCC</label>
+                    <InputText id="SubMerchantMcc" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubMerchantMcc" />
+                </div>
+                <div class="mb-3">
+                    <label for="SubMerchantCity" class="form-label">Submerchant City</label>
+                    <InputText id="SubMerchantCity" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubMerchantCity" />
+                </div>
+                <div class="mb-3">
+                    <label for="SubMerchantPostalCode" class="form-label">Submerchant Postal Code</label>
+                    <InputText id="SubMerchantPostalCode" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubMerchantPostalCode" />
+                </div>
+                <div class="mb-3">
+                    <label for="SubMerchantCountry" class="form-label">Submerchant Country</label>
+                    <InputText id="SubMerchantCountry" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubMerchantCountry" />
+                </div>
+                <div class="mb-3">
+                    <label for="SubMerchantOrganizationId" class="form-label">Submerchant Organization ID</label>
+                    <InputText id="SubMerchantOrganizationId" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubMerchantOrganizationId" />
+                </div>
+                <div class="mb-3">
+                    <label for="SubMerchantFacilicatorId" class="form-label">Submerchant Facilicator ID</label>
+                    <InputText id="SubMerchantFacilicatorId" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubMerchantFacilicatorId" />
+                </div>
+                <div class="mb-3">
+                    <label for="SubMerchantTerminalNo" class="form-label">Submerchant Terminal No</label>
+                    <InputText id="SubMerchantTerminalNo" class="form-control" @bind-Value="paymentRequestData.Submerchant.SubMerchantTerminalNo" />
+                </div>
             </div>
         </div>
 
@@ -213,7 +256,7 @@
 
     private void GenerateRandomOrderId()
     {
-        paymentRequestData.Order.OrderId = new Random().Next(1,99999).ToString();
+        paymentRequestData.Order.OrderId = new Random().Next(1, 99999).ToString();
         isOrderIdReadonly = true;
     }
 

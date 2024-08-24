@@ -71,6 +71,11 @@
         /// Para puan işlemi iptali.
         /// </summary>
         public const string ParaPuanVoid = "ParaPuanVoid";
+
+        /// <summary>
+        /// Segment sorgulama işlemi.
+        /// </summary>
+        public const string SegmentInquiry = "SegmentInquiry";
     }
 
 }

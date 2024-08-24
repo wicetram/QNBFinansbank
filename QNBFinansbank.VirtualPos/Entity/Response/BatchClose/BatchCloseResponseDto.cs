@@ -17,5 +17,11 @@
         /// Bu alan, işlemle ilgili otorizasyon kodu, banka referans numarası gibi bilgileri içerir.
         /// </summary>
         public BatchCloseResponseDataDto? BatchClose { get; set; }
+
+        /// <summary>
+        /// Toplu kapama işlemine ait istek ve cevabı içerir
+        /// Bu alan, işleme ait request ve response gibi bilgileri içerir
+        /// </summary>
+        public ApiLogDto? ApiLog { get; set; }
     }
 }

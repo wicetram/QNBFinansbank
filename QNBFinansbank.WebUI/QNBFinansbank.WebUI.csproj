@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\QNBFinansbank.CashManagement\QNBFinansbank.CashManagement.csproj" />
+    <ProjectReference Include="..\QNBFinansbank.MoneyTransfer\QNBFinansbank.MoneyTransfer.csproj" />
     <ProjectReference Include="..\QNBFinansbank.VirtualPos\QNBFinansbank.VirtualPos.csproj" />
   </ItemGroup>
 

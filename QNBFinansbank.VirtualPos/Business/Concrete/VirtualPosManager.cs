@@ -7,6 +7,7 @@ using QNBFinansbank.VirtualPos.Entity.Request.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.History;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.NonSecure;
+using QNBFinansbank.VirtualPos.Entity.Request.Payment.PaymentFacilicator;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.ThreeD;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Request.PreAuth;
@@ -39,12 +40,12 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
     {
         /// <summary>
         /// İptal (Cancel) işlemini gerçekleştirir.
-        /// Bu metot, verilen `CancelRequestDataDto` nesnesini kullanarak iptal işlemini başlatır, 
+        /// Bu metot, verilen `CancelRequestDto` nesnesini kullanarak iptal işlemini başlatır, 
         /// sonuçları kontrol eder ve yanıtı `CancelResponseDataDto` olarak döner.
         /// </summary>
         /// <param name="cancel">İptal işlemi için gerekli olan parametreleri içeren `CancelRequestDataDto` nesnesi.</param>
         /// <returns>
-        /// İşlemin sonucunu ve ilgili bilgileri içeren `CancelResponseDataDto` nesnesi.
+        /// İşlemin sonucunu ve ilgili bilgileri içeren `CancelResponseDto` nesnesi.
         /// Başarılı olması durumunda, `Result` alanı başarılı olarak döner. 
         /// Başarısız olması durumunda, hata kodu ve mesajı ile birlikte döner.
         /// </returns>
@@ -61,21 +62,22 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
 
                     MbrId = cancel?.Account?.MbrId,
                     MerchantID = cancel?.Account?.MerchantId,
-                    SecureType = cancel?.Account?.SecureType,
-                    TxnType = cancel?.Account?.TxnType,
                     UserCode = cancel?.Account?.UserCode,
                     UserPass = cancel?.Account?.UserPass,
 
+                    SecureType = cancel?.Account?.SecureType ?? SecureTypes.NonSecure,
+                    TxnType = cancel?.Account?.TxnType ?? TxnTypes.Void,
                 };
 
                 var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, cancel?.Account?.BaseUrl);
 
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
-                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                if (!response.IsSuccessful || string.IsNullOrEmpty(response.Content))
                 {
                     return new CancelResponseDto
                     {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{cancel?.Account?.TxnType} işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{cancel?.Account?.TxnType} işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.Cancel, dto, response?.Content)
                     };
                 }
 
@@ -86,13 +88,25 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     return new CancelResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{cancel?.Account?.TxnType} işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.Cancel, dto, response?.Content)
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result.ProcReturnCode != Results.Approved)
+                {
+                    return new CancelResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{cancel?.Account?.TxnType} işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.Cancel, dto, response?.Content)
                     };
                 }
 
                 return new CancelResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{cancel?.Account?.TxnType} işlemi başarılı."),
-                    Cancel = result
+                    Cancel = result,
+                    ApiLog = SerializerHelper.ProcessData(MethodNames.Cancel, dto, response?.Content)
                 };
             }
             catch (Exception ex)
@@ -100,7 +114,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
                 return new CancelResponseDto
                 {
-                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{cancel?.Account?.TxnType} işlemi sırasında tanımsız hata. Hata: {ex.Message}")
+                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{cancel?.Account?.TxnType} işlemi sırasında tanımsız hata. Hata: {ex.Message}"),
                 };
             }
         }
@@ -127,20 +141,22 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
 
                     MbrId = check?.Account?.MbrId,
                     MerchantID = check?.Account?.MerchantId,
-                    SecureType = check?.Account?.SecureType,
-                    TxnType = check?.Account?.TxnType,
                     UserCode = check?.Account?.UserCode,
-                    UserPass = check?.Account?.UserPass
+                    UserPass = check?.Account?.UserPass,
+
+                    TxnType = check?.Account?.TxnType ?? TxnTypes.OrderInquiry,
+                    SecureType = check?.Account?.SecureType ?? SecureTypes.Inquiry,
                 };
 
                 var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, check?.Account?.BaseUrl);
 
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
-                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                if (!response.IsSuccessful || string.IsNullOrEmpty(response.Content))
                 {
                     return new CheckResponseDto
                     {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{check?.Account?.TxnType} işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{check?.Account?.TxnType} işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.Check, dto, response?.Content)
                     };
                 }
 
@@ -151,13 +167,25 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     return new CheckResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{check?.Account?.TxnType} işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.Check, dto, response?.Content)
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result.ProcReturnCode != Results.Approved)
+                {
+                    return new CheckResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{check?.Account?.TxnType} işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.Check, dto, response?.Content)
                     };
                 }
 
                 return new CheckResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{check?.Account?.TxnType} işlemi başarılı."),
-                    CheckResponse = result
+                    CheckResponse = result,
+                    ApiLog = SerializerHelper.ProcessData(MethodNames.Check, dto, response?.Content)
                 };
 
             }
@@ -196,20 +224,22 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
 
                     MbrId = refund?.Account?.MbrId,
                     MerchantID = refund?.Account?.MerchantId,
-                    SecureType = refund?.Account?.SecureType,
-                    TxnType = refund?.Account?.TxnType,
                     UserCode = refund?.Account?.UserCode,
                     UserPass = refund?.Account?.UserPass,
+
+                    TxnType = refund?.Account?.TxnType ?? TxnTypes.Refund,
+                    SecureType = refund?.Account?.SecureType ?? SecureTypes.NonSecure,
                 };
 
                 var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, refund?.Account?.BaseUrl);
 
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
-                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                if (!response.IsSuccessful || string.IsNullOrEmpty(response.Content))
                 {
                     return new RefundResponseDto
                     {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{refund?.Account?.TxnType} işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{refund?.Account?.TxnType} işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.Refund, dto, response?.Content)
                     };
                 }
 
@@ -220,13 +250,25 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     return new RefundResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{refund?.Account?.TxnType} işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.Refund, dto, response?.Content)
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result.ProcReturnCode != Results.Approved)
+                {
+                    return new RefundResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{refund?.Account?.TxnType} işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.Refund, dto, response?.Content)
                     };
                 }
 
                 return new RefundResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{refund?.Account?.TxnType} işlemi başarılı."),
-                    Response = result
+                    Response = result,
+                    ApiLog = SerializerHelper.ProcessData(MethodNames.Refund, dto, response?.Content)
                 };
             }
             catch (Exception ex)
@@ -295,17 +337,18 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 request.AddParameter("UserCode", threeDModel.UserCode);
                 request.AddParameter("UserPass", threeDModel.UserPass);
                 request.AddParameter("OrderId", threeDModel.OrderId);
-                request.AddParameter("SecureType", threeDModel.SecureType);
+                request.AddParameter("SecureType", threeDModel.SecureType ?? SecureTypes.ThreeDModelPayment);
                 request.AddParameter("RequestGuid", threeDModel.RequestGuid);
 
                 var client = new RestClient($"{threeDModel?.BaseUrl}");
                 var response = client.Execute(request);
 
-                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                if (!response.IsSuccessful || string.IsNullOrEmpty(response.Content))
                 {
                     return new ThreeDModelPaymentResponseDto
                     {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"3D Model ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"3D Model ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.ThreeDModelPayment, threeDModel, response?.Content)
                     };
                 }
 
@@ -315,15 +358,16 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 {
                     return new ThreeDModelPaymentResponseDto
                     {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, "3D Model ödeme işlemi başarısız."),
-                        ThreeDModelPayment = result
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"3D Model ödeme işlemi başarısız. Hata detayı: {result.ProcReturnCode} | {result.ErrMsg}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.ThreeDModelPayment, threeDModel, response?.Content)
                     };
                 }
 
                 return new ThreeDModelPaymentResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, "3D Model ödeme işlemi başarılı."),
-                    ThreeDModelPayment = result
+                    ThreeDModelPayment = result,
+                    ApiLog = SerializerHelper.ProcessData(MethodNames.ThreeDModelPayment, threeDModel, response?.Content)
                 };
             }
             catch (Exception ex)
@@ -364,22 +408,23 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     UserCode = preAuthRequest?.Account?.UserCode,
                     UserPass = preAuthRequest?.Account?.UserPass,
 
-                    SecureType = preAuthRequest?.Account?.SecureType,
-                    TxnType = preAuthRequest?.Account?.TxnType,
+                    SecureType = preAuthRequest?.Account?.SecureType ?? SecureTypes.NonSecure,
+                    TxnType = preAuthRequest?.Account?.TxnType ?? TxnTypes.PostAuth,
 
                     Pan = preAuthRequest?.Card?.CardNo,
                     Cvv2 = preAuthRequest?.Card?.CVC,
-                    Expiry = preAuthRequest?.Card?.ExpireDate,
+                    Expiry = $"{preAuthRequest?.Card?.ExpireMonth}{preAuthRequest?.Card?.ExpireYear}",
                 };
 
                 var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, preAuthRequest?.Account?.BaseUrl);
 
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
-                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                if (!response.IsSuccessful || string.IsNullOrEmpty(response.Content))
                 {
                     return new PreAuthResponseDto
                     {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{preAuthRequest?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{preAuthRequest?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.StopPreAuth, dto, response?.Content)
                     };
                 }
 
@@ -390,13 +435,25 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     return new PreAuthResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{preAuthRequest?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.StopPreAuth, dto, response?.Content)
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result.ProcReturnCode != Results.Approved)
+                {
+                    return new PreAuthResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{preAuthRequest?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.StopPreAuth, dto, response?.Content)
                     };
                 }
 
                 return new PreAuthResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{preAuthRequest?.Account?.SecureType} ödeme işlemi başarılı."),
-                    PreAuthResponse = result
+                    PreAuthResponse = result,
+                    ApiLog = SerializerHelper.ProcessData(MethodNames.StopPreAuth, dto, response?.Content)
                 };
             }
             catch (Exception ex)
@@ -429,22 +486,25 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     Lang = rewardPointsRequestDto?.Order?.Language,
                     OrderId = rewardPointsRequestDto?.Order?.OrderId,
                     Pan = rewardPointsRequestDto?.Card?.CardNo,
+
                     MbrId = rewardPointsRequestDto?.Account?.MbrId,
                     MerchantID = rewardPointsRequestDto?.Account?.MerchantId,
                     UserCode = rewardPointsRequestDto?.Account?.UserCode,
                     UserPass = rewardPointsRequestDto?.Account?.UserPass,
-                    SecureType = rewardPointsRequestDto?.Account?.SecureType,
-                    TxnType = rewardPointsRequestDto?.Account?.TxnType,
+
+                    SecureType = rewardPointsRequestDto?.Account?.SecureType ?? SecureTypes.Inquiry,
+                    TxnType = rewardPointsRequestDto?.Account?.TxnType ?? TxnTypes.ParaPuanInquiry,
                 };
 
                 var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, rewardPointsRequestDto?.Account?.BaseUrl);
 
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
-                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                if (!response.IsSuccessful || string.IsNullOrEmpty(response.Content))
                 {
                     return new CheckRewardPointsResponseDto
                     {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{rewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{rewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.CheckRewardPoints, dto, response?.Content)
                     };
                 }
 
@@ -455,13 +515,25 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     return new CheckRewardPointsResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{rewardPointsRequestDto?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.CheckRewardPoints, dto, response?.Content)
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result.ProcReturnCode != Results.Approved)
+                {
+                    return new CheckRewardPointsResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{rewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.CheckRewardPoints, dto, response?.Content)
                     };
                 }
 
                 return new CheckRewardPointsResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{rewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarılı."),
-                    Rewards = result
+                    Rewards = result,
+                    ApiLog = SerializerHelper.ProcessData(MethodNames.CheckRewardPoints, dto, response?.Content)
                 };
             }
             catch (Exception ex)
@@ -493,28 +565,32 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     Currency = useRewardPointsRequestDto?.Order?.Currency,
                     Lang = useRewardPointsRequestDto?.Order?.Language,
                     OrderId = useRewardPointsRequestDto?.Order?.OrderId,
+
                     Pan = useRewardPointsRequestDto?.Card?.CardNo,
                     Cvv2 = useRewardPointsRequestDto?.Card?.CVC,
-                    Expiry = useRewardPointsRequestDto?.Card?.ExpireDate,
+                    Expiry = $"{useRewardPointsRequestDto?.Card?.ExpireMonth}{useRewardPointsRequestDto?.Card?.ExpireYear}",
+
                     BonusAmount = useRewardPointsRequestDto?.Order?.BonusAmount,
                     PurchAmount = useRewardPointsRequestDto?.Order?.Amount,
+
                     MbrId = useRewardPointsRequestDto?.Account?.MbrId,
                     MerchantID = useRewardPointsRequestDto?.Account?.MerchantId,
                     UserCode = useRewardPointsRequestDto?.Account?.UserCode,
                     UserPass = useRewardPointsRequestDto?.Account?.UserPass,
-                    SecureType = useRewardPointsRequestDto?.Account?.SecureType,
-                    TxnType = useRewardPointsRequestDto?.Account?.TxnType,
 
+                    SecureType = useRewardPointsRequestDto?.Account?.SecureType ?? SecureTypes.NonSecure,
+                    TxnType = useRewardPointsRequestDto?.Account?.TxnType ?? TxnTypes.ParaPuanAuth,
                 };
 
                 var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, useRewardPointsRequestDto?.Account?.BaseUrl);
 
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
-                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                if (!response.IsSuccessful || string.IsNullOrEmpty(response.Content))
                 {
                     return new UseRewardPointsResponseDto
                     {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{useRewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{useRewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.UseRewardPoints, dto, response?.Content)
                     };
                 }
 
@@ -525,13 +601,26 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     return new UseRewardPointsResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{useRewardPointsRequestDto?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.UseRewardPoints, dto, response?.Content)
                     };
                 }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result.ProcReturnCode != Results.Approved)
+                {
+                    return new UseRewardPointsResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{useRewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result.ProcReturnCode} | Hata Mesajı: {result.ErrMsg}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.UseRewardPoints, dto, response?.Content)
+                    };
+                }
+
 
                 return new UseRewardPointsResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{useRewardPointsRequestDto?.Account?.SecureType} ödeme işlemi başarılı."),
-                    RewardPointsResponse = result
+                    RewardPointsResponse = result,
+                    ApiLog = SerializerHelper.ProcessData(MethodNames.UseRewardPoints, dto, response?.Content)
                 };
             }
             catch (Exception ex)
@@ -566,24 +655,28 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     Currency = historyRequestDataDto?.Order?.Currency,
                     Lang = historyRequestDataDto?.Order?.Language,
                     OrderId = historyRequestDataDto?.Order?.OrderId,
+
+                    ReqDate = historyRequestDataDto?.RequestDate,
+                    RequestStartDatetime = historyRequestDataDto?.RequestStartDatetime,
+
                     MbrId = historyRequestDataDto?.Account?.MbrId,
                     MerchantID = historyRequestDataDto?.Account?.MerchantId,
                     UserCode = historyRequestDataDto?.Account?.UserCode,
                     UserPass = historyRequestDataDto?.Account?.UserPass,
-                    SecureType = historyRequestDataDto?.Account?.SecureType,
-                    TxnType = historyRequestDataDto?.Account?.TxnType,
-                    ReqDate = historyRequestDataDto?.RequestDate,
-                    RequestStartDatetime = historyRequestDataDto?.RequestStartDatetime,
+
+                    SecureType = historyRequestDataDto?.Account?.SecureType ?? SecureTypes.Report,
+                    TxnType = historyRequestDataDto?.Account?.TxnType ?? TxnTypes.TxnHistory,
                 };
 
                 var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, historyRequestDataDto?.Account?.BaseUrl);
 
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
-                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                if (!response.IsSuccessful || string.IsNullOrEmpty(response.Content))
                 {
                     return new HistoryResponseDto
                     {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.History, dto, response?.Content)
                     };
                 }
 
@@ -594,13 +687,25 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     return new HistoryResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.History, dto, response?.Content)
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result?.PaymentRequest?.ProcReturnCode != Results.Approved)
+                {
+                    return new HistoryResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result?.PaymentRequest?.ProcReturnCode} | Hata Mesajı: {result?.PaymentRequest?.ErrMsg}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.History, dto, response?.Content)
                     };
                 }
 
                 return new HistoryResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi başarılı."),
-                    History = result
+                    History = result,
+                    ApiLog = SerializerHelper.ProcessData(MethodNames.History, dto, response?.Content)
                 };
             }
             catch (Exception ex)
@@ -632,24 +737,27 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 // Toplu kapama isteği için gerekli DTO'nun oluşturulması.
                 var dto = new BatchCloseRequestDataDto
                 {
+                    Currency = batchCloseRequestData?.Order?.Currency,
+                    Lang = batchCloseRequestData?.Order?.Language,
+
                     MbrId = batchCloseRequestData?.Account?.MbrId,
                     MerchantID = batchCloseRequestData?.Account?.MerchantId,
                     UserCode = batchCloseRequestData?.Account?.UserCode,
                     UserPass = batchCloseRequestData?.Account?.UserPass,
-                    SecureType = batchCloseRequestData?.Account?.SecureType,
-                    TxnType = batchCloseRequestData?.Account?.TxnType,
-                    Currency = batchCloseRequestData?.Order?.Currency,
-                    Lang = batchCloseRequestData?.Order?.Language
+                    
+                    SecureType = batchCloseRequestData?.Account?.SecureType ?? SecureTypes.NonSecure,
+                    TxnType = batchCloseRequestData?.Account?.TxnType ?? TxnTypes.BatchClose,
                 };
 
                 var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, batchCloseRequestData?.Account?.BaseUrl);
 
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
-                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                if (!response.IsSuccessful || string.IsNullOrEmpty(response.Content))
                 {
                     return new BatchCloseResponseDto
                     {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{batchCloseRequestData?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{batchCloseRequestData?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.BatchClose, dto, response?.Content)
                     };
                 }
 
@@ -660,13 +768,25 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     return new BatchCloseResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{batchCloseRequestData?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.BatchClose, dto, response?.Content)
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result?.ProcReturnCode != Results.Approved)
+                {
+                    return new BatchCloseResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{batchCloseRequestData?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result?.ProcReturnCode} | Hata Mesajı: {result?.ErrMsg}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.BatchClose, dto, response?.Content)
                     };
                 }
 
                 return new BatchCloseResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{batchCloseRequestData?.Account?.SecureType} ödeme işlemi başarılı."),
-                    BatchClose = result
+                    BatchClose = result,
+                    ApiLog = SerializerHelper.ProcessData(MethodNames.BatchClose, dto, response?.Content)
                 };
             }
             catch (Exception ex)
@@ -698,25 +818,28 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 // Segment sorgulama isteği için gerekli DTO'nun oluşturulması.
                 var dto = new SegmentInquiryRequestDataDto
                 {
+                    Lang = segmentInquiryRequestDto?.Order?.Language,
+                    Pan = segmentInquiryRequestDto?.Card?.CardNo,
+                    Expiry = $"{segmentInquiryRequestDto?.Card?.ExpireMonth}{segmentInquiryRequestDto?.Card?.ExpireYear}",
+
                     MbrId = segmentInquiryRequestDto?.Account?.MbrId,
                     MerchantID = segmentInquiryRequestDto?.Account?.MerchantId,
                     UserCode = segmentInquiryRequestDto?.Account?.UserCode,
                     UserPass = segmentInquiryRequestDto?.Account?.UserPass,
-                    SecureType = segmentInquiryRequestDto?.Account?.SecureType,
-                    TxnType = segmentInquiryRequestDto?.Account?.TxnType,
-                    Lang = segmentInquiryRequestDto?.Order?.Language,
-                    Pan = segmentInquiryRequestDto?.Card?.CardNo,
-                    Expiry = segmentInquiryRequestDto?.Card?.ExpireDate
+                    
+                    SecureType = segmentInquiryRequestDto?.Account?.SecureType ?? SecureTypes.Inquiry,
+                    TxnType = segmentInquiryRequestDto?.Account?.TxnType ?? TxnTypes.SegmentInquiry,
                 };
 
                 var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, segmentInquiryRequestDto?.Account?.BaseUrl);
 
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
-                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                if (!response.IsSuccessful || string.IsNullOrEmpty(response.Content))
                 {
                     return new SegmentInquiryResponseDto
                     {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{segmentInquiryRequestDto?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{segmentInquiryRequestDto?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.SegmentInquiry, dto, response?.Content)
                     };
                 }
 
@@ -727,13 +850,25 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     return new SegmentInquiryResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{segmentInquiryRequestDto?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.SegmentInquiry, dto, response?.Content)
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result?.ProcReturnCode != Results.Approved)
+                {
+                    return new SegmentInquiryResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{segmentInquiryRequestDto?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result?.ProcReturnCode} | Hata Mesajı: {result?.ErrMsg}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.SegmentInquiry, dto, response?.Content)
                     };
                 }
 
                 return new SegmentInquiryResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{segmentInquiryRequestDto?.Account?.SecureType} ödeme işlemi başarılı."),
-                    SegmentInquiryResponse = result
+                    SegmentInquiryResponse = result,
+                    ApiLog = SerializerHelper.ProcessData(MethodNames.SegmentInquiry, dto, response?.Content)
                 };
             }
             catch (Exception ex)
@@ -769,22 +904,37 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     UserCode = startPayment?.Account?.UserCode,
                     UserPass = startPayment?.Account?.UserPass,
 
-                    SecureType = startPayment?.Account?.SecureType,
-                    TxnType = startPayment?.Account?.TxnType,
+                    SecureType = startPayment?.Account?.SecureType ?? SecureTypes.NonSecure,
+                    TxnType = startPayment?.Account?.TxnType ?? TxnTypes.Auth,
 
                     Pan = startPayment?.Card?.CardNo,
                     Cvv2 = startPayment?.Card?.CVC,
-                    Expiry = startPayment?.Card?.ExpireDate,
+                    Expiry = $"{startPayment?.Card?.ExpireMonth}{startPayment?.Card?.ExpireYear}",
+
+                    PaymentFacilicator = new PaymentFacilicatorRequestDto
+                    {
+                        PaymentFacilitatorId = startPayment?.Submerchant?.SubMerchantFacilicatorId,
+                        SubMerchantCode = startPayment?.Submerchant?.SubmerchantIdCode,
+                        IndSalesOrgId = startPayment?.Order?.OrderId,
+                        SubmerchantMCC = startPayment?.Submerchant?.SubMerchantMcc,
+                        CardAcceptorName = startPayment?.Submerchant?.SubmerchantName,
+                        CardAcceptorCity = startPayment?.Submerchant?.SubMerchantCity,
+                        CardAcceptorPostalCode = startPayment?.Submerchant?.SubMerchantPostalCode,
+                        CardAcceptorStreet = startPayment?.Submerchant?.SubMerchantCity,
+                        CardAcceptorCountry = startPayment?.Submerchant?.SubMerchantCountry,
+                        CardAcceptorState = startPayment?.Submerchant?.SubMerchantCity
+                    }
                 };
 
                 var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, startPayment?.Account?.BaseUrl);
 
                 // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
-                if (!response.IsSuccessful && string.IsNullOrEmpty(response.Content))
+                if (!response.IsSuccessful || string.IsNullOrEmpty(response.Content))
                 {
                     return new PaymentResponseDto
                     {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{startPayment?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}")
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{startPayment?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.Payment, dto, response?.Content)
                     };
                 }
 
@@ -795,14 +945,26 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     return new PaymentResponseDto
                     {
                         Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{startPayment?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
-                        Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId)
+                        Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.Payment, dto, response?.Content)
+                    };
+                }
+
+                if (result.ProcReturnCode != Results.Approved)
+                {
+                    return new PaymentResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{startPayment?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result?.ProcReturnCode} | Hata Mesajı: {result?.ErrMsg}"),
+                        Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.Payment, dto, response?.Content)
                     };
                 }
 
                 return new PaymentResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{startPayment?.Account?.SecureType} ödeme işlemi başarılı."),
-                    Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId)
+                    Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId),
+                    ApiLog = SerializerHelper.ProcessData(MethodNames.Payment, dto, response?.Content)
                 };
             }
             catch (Exception ex)
@@ -851,17 +1013,25 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
 
                     Pan = startPayment?.Card?.CardNo,
                     Cvv2 = startPayment?.Card?.CVC,
-                    Expiry = startPayment?.Card?.ExpireDate,
+                    Expiry = $"{startPayment?.Card?.ExpireMonth}{startPayment?.Card?.ExpireYear}",
 
                     OkUrl = startPayment?.Order?.ReturnUrl,
                     FailUrl = startPayment?.Order?.ReturnUrl,
                     Rnd = startPayment?.Order?.Random,
                     Hash = hash,
 
-                    //PF aşaması henüz tamamlanmadığı için kapatıldı.
                     //PaymentFacilicator = new PaymentFacilicatorRequestDto
                     //{
-
+                    //    PaymentFacilitatorId = startPayment?.Submerchant?.SubMerchantFacilicatorId,
+                    //    SubMerchantCode = startPayment?.Submerchant?.SubmerchantIdCode,
+                    //    IndSalesOrgId = startPayment?.Order?.OrderId,
+                    //    SubmerchantMCC = startPayment?.Submerchant?.SubMerchantMcc,
+                    //    CardAcceptorName = startPayment?.Submerchant?.SubmerchantName,
+                    //    CardAcceptorCity = startPayment?.Submerchant?.SubMerchantCity,
+                    //    CardAcceptorPostalCode = startPayment?.Submerchant?.SubMerchantPostalCode,
+                    //    CardAcceptorStreet = startPayment?.Submerchant?.SubMerchantCity,
+                    //    CardAcceptorCountry = startPayment?.Submerchant?.SubMerchantCountry,
+                    //    CardAcceptorState = startPayment?.Submerchant?.SubMerchantCity
                     //}
                 };
 
@@ -872,7 +1042,8 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 return new PaymentResponseDto
                 {
                     Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{startPayment?.Account?.SecureType} ödeme işlemi başarılı."),
-                    Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId, html)
+                    Payment = ResponseHandler.GetPayment(startPayment?.Order?.OrderId, html),
+                    ApiLog = SerializerHelper.ProcessData(MethodNames.Payment, dto, html)
                 };
             }
             catch (Exception ex)

@@ -47,6 +47,6 @@
         /// Bu alan, gerçekleştirilecek işlemin URL'sini belirtir.
         /// Varsayılan değer olarak <c>null</c> olabilir.
         /// </summary>
-        public string? ActionUrl { get; set; }
+        public string? Action { get; set; }
     }
 }

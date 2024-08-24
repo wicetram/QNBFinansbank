@@ -1,4 +1,9 @@
 ﻿using RestSharp;
+using System.Text;
+using System.Xml.Serialization;
+using System.Xml;
+using QNBFinansbank.VirtualPos.Entity.Request.Check;
+using QNBFinansbank.VirtualPos.Utility.Serialization;
 
 namespace QNBFinansbank.VirtualPos.Utility.ApiClient
 {
@@ -17,8 +22,8 @@ namespace QNBFinansbank.VirtualPos.Utility.ApiClient
         public static RestResponse RestXmlExecuteHelper(object modal, Method method, string? baseUrl)
         {
             var request = new RestRequest { Method = method };
-            request.AddHeader("Content-Type", "application/xml");
-            request.AddXmlBody(modal, ContentType.Xml);
+            request.AddHeader("Content-Type", "text/xml; charset=utf-8");
+            request.AddParameter("text/xml", modal, ParameterType.RequestBody);
 
             // API'ye gönderilecek olan REST istemcisinin oluşturulması.
             var client = new RestClient($"{baseUrl}");

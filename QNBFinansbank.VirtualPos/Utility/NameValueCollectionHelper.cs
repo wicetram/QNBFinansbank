@@ -20,16 +20,33 @@ namespace QNBFinansbank.VirtualPos.Utility
             }
 
             var nameValueCollection = new NameValueCollection();
-            foreach (PropertyInfo property in typeof(T).GetProperties())
+            AddPropertiesToCollection(dto, nameValueCollection);
+            return nameValueCollection;
+        }
+
+        /// <summary>
+        /// Bir nesnenin özelliklerini NameValueCollection'a ekler.
+        /// </summary>
+        /// <param name="obj">NameValueCollection'a özellikleri eklenecek nesne.</param>
+        /// <param name="collection">Özelliklerin ekleneceği NameValueCollection.</param>
+        private static void AddPropertiesToCollection(object obj, NameValueCollection collection)
+        {
+            foreach (PropertyInfo property in obj.GetType().GetProperties())
             {
-                string name = property.Name;
-                object? value = property.GetValue(dto);
+                object? value = property.GetValue(obj);
                 if (value != null)
                 {
-                    nameValueCollection.Add(name, value.ToString());
+                    // Eğer property bir sınıf ise, bu sınıfın da özelliklerini dolaş
+                    if (property.PropertyType.IsClass && property.PropertyType != typeof(string))
+                    {
+                        AddPropertiesToCollection(value, collection);
+                    }
+                    else
+                    {
+                        collection.Add(property.Name, value.ToString());
+                    }
                 }
             }
-            return nameValueCollection;
         }
 
         /// <summary>
@@ -46,7 +63,7 @@ namespace QNBFinansbank.VirtualPos.Utility
             sb.AppendLine($"<form name='PostForm' id='paymentForm' method='POST' action='{actionUrl}'><div hidden='hidden'>");
 
             var inputFields = collection.AllKeys
-                                        .Select(key => $"<input type='hidden' name='{key}' value='{collection[key]}' />");
+                                        .Select(key => $"<input type='hidden' type='text' name='{key}' value='{collection[key]}' />");
 
             sb.AppendLine(string.Join(Environment.NewLine, inputFields));
 
