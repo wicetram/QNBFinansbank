@@ -1,12 +1,13 @@
-﻿@page "/check"
-@using QNBFinansbank.VirtualPos.Entity.Response.Check
+﻿@page "/postauth"
+@using QNBFinansbank.VirtualPos.Entity.Request.PreAuth
+@using QNBFinansbank.VirtualPos.Entity.Response.PreAuth
 @using System.Reflection
 
 @if (Success)
 {
     <EditForm Model="@paymentRequestData" OnValidSubmit="HandleValidSubmit">
         <div class="container">
-            <h2 class="mt-4">Payment Request Form</h2>
+            <h2 class="mt-4">Post Auth Request Form</h2>
             <div class="card mt-4">
                 <div class="card-header">Account Information</div>
                 <div class="card-body">
@@ -99,69 +100,109 @@
                 </div>
             </div>
 
+            <div class="card mt-4">
+                <div class="card-header">Card Information</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="CardNo" class="form-label">Card Number</label>
+                        <InputText id="CardNo" class="form-control" @bind-Value="paymentRequestData.Card.CardNo" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="CardHolderName" class="form-label">Card Holder Name</label>
+                        <InputText id="CardHolderName" class="form-control" @bind-Value="paymentRequestData.Card.CardHolderName" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="CVC" class="form-label">CVC</label>
+                        <InputText id="CVC" class="form-control" @bind-Value="paymentRequestData.Card.CVC" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="ExpireMonth" class="form-label">Expire Month</label>
+                        <InputText id="ExpireMonth" class="form-control" @bind-Value="paymentRequestData.Card.ExpireMonth" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="ExpireYear" class="form-label">Expire Year</label>
+                        <InputText id="ExpireYear" class="form-control" @bind-Value="paymentRequestData.Card.ExpireYear" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Email" class="form-label">Email</label>
+                        <InputText id="Email" class="form-control" @bind-Value="paymentRequestData.Card.Email" />
+                    </div>
+                </div>
+            </div>
+
             <button type="submit" class="btn btn-primary mt-4">Submit Payment</button>
         </div>
     </EditForm>
 }
 else
 {
-    <table class="table table-responsive">
-        <thead>
-            <tr>
-                <th>Result</th>
-                <th>Result Code</th>
-                <th>Result Message</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>@(response?.Result?.Result == true ? "Başarılı" : "Başarısız")</td>
-                <td>@response?.Result?.ResultCode</td>
-                <td>@response?.Result?.ResultMessage</td>
-            </tr>
-        </tbody>
-    </table>
-
-    @if (response?.CheckResponse != null)
+    @if (response != null && response.Result != null)
     {
         <table class="table table-responsive">
             <thead>
                 <tr>
-                    <th>Property</th>
-                    <th>Value</th>
+                    <th>Result</th>
+                    <th>Result Code</th>
+                    <th>Result Message</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var prop in response.CheckResponse.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
-                {
-                    <tr>
-                        <td>@prop.Name</td>
-                        <td>@prop.GetValue(response.CheckResponse)?.ToString()</td>
-                    </tr>
-                }
+                <tr>
+                    <td>@(response.Result.Result ? "Başarılı" : "Başarısız")</td>
+                    <td>@response.Result.ResultCode</td>
+                    <td>@response.Result.ResultMessage</td>
+                </tr>
             </tbody>
         </table>
+
+        @if (response.PreAuthResponse != null)
+        {
+            <h3>Transfer Details</h3>
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var prop in response.PreAuthResponse.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                    {
+                        <tr>
+                            <td>@prop.Name</td>
+                            <td>@prop.GetValue(response.PreAuthResponse)?.ToString()</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No transactions found.</p>
+        }
     }
     else
     {
-        <p>No data available.</p>
+        <p>Loading...</p>
     }
 }
 
 @code {
-    CheckResponseDto? response;
-    private CheckRequestDto paymentRequestData = new CheckRequestDto
+    private PreAuthRequestDto paymentRequestData = new PreAuthRequestDto
         {
             Account = new AccountDto(),
             Order = new OrderDto(),
+            Card = new CardDto(),
         };
 
-    private bool isRandomReadonly = false;
+    PreAuthResponseDto? response;
+
     private bool Success = true;
+    private bool isRandomReadonly = false;
 
     private void HandleValidSubmit()
     {
-        response = VirtualPos.Check(paymentRequestData);
+        response = VirtualPos.StopPreAuth(paymentRequestData);
         Success = false;
         StateHasChanged();
     }
@@ -171,5 +212,4 @@ else
         paymentRequestData.Order.Random = Guid.NewGuid().ToString("N").Substring(0, 8);
         isRandomReadonly = true;
     }
-
 }
