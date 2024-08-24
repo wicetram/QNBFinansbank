@@ -40,12 +40,24 @@ namespace QNBFinansbank.VirtualPos.Utility.Serialization
 
             if (data is string)
             {
+                // Eğer veri zaten bir string ise, olduğu gibi döndür
                 return data.ToString();
             }
             else
             {
-                return JsonConvert.SerializeObject(data);
+                // Veri bir obje ise JSON formatına serileştir
+                return SerializeToJson(data);
             }
+        }
+
+        /// <summary>
+        /// Bir nesneyi string olarak serileştirir.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static string SerializeToJson(this object data)
+        {
+            return JsonConvert.SerializeObject(data, Formatting.Indented);
         }
     }
 }

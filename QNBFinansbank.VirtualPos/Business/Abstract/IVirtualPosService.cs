@@ -1,22 +1,26 @@
 ﻿using QNBFinansbank.VirtualPos.Entity.Request.BatchClose;
 using QNBFinansbank.VirtualPos.Entity.Request.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
+using QNBFinansbank.VirtualPos.Entity.Request.EOD.QNBFinansbank.VirtualPos.Entity.Request.EOD;
 using QNBFinansbank.VirtualPos.Entity.Request.History;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Request.PreAuth;
 using QNBFinansbank.VirtualPos.Entity.Request.Refund;
+using QNBFinansbank.VirtualPos.Entity.Request.Report;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Usage;
 using QNBFinansbank.VirtualPos.Entity.Request.SegmentInquiry;
 using QNBFinansbank.VirtualPos.Entity.Response.BatchClose;
 using QNBFinansbank.VirtualPos.Entity.Response.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Response.Check;
+using QNBFinansbank.VirtualPos.Entity.Response.EOD;
 using QNBFinansbank.VirtualPos.Entity.Response.History;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Response.PreAuth;
 using QNBFinansbank.VirtualPos.Entity.Response.Refund;
+using QNBFinansbank.VirtualPos.Entity.Response.Report;
 using QNBFinansbank.VirtualPos.Entity.Response.RewardPoints.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.RewardPoints.Usage;
 using QNBFinansbank.VirtualPos.Entity.Response.SegmentInquiry;
@@ -165,6 +169,46 @@ namespace QNBFinansbank.VirtualPos.Business.Abstract
         /// </returns>
         BatchCloseResponseDto BatchClose(BatchCloseRequestDto batchCloseRequestDto);
 
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinde segment sorgulama işlemi gerçekleştirir.
+        /// Bu yöntem, segment sorgulama parametrelerini alarak işlem sonucunu döner.
+        /// </summary>
+        /// <param name="segmentInquiryRequestDto">
+        /// Segment sorgulama işlemi için gerekli olan parametreleri içeren bir <see cref="SegmentInquiryRequestDto"/> nesnesi.
+        /// Bu nesne, sorgulama işlemiyle ilgili hesap, sipariş ve kart bilgilerini içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu içeren bir <see cref="SegmentInquiryResponseDto"/> nesnesi döner.
+        /// Bu nesne, segment sorgulama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
         SegmentInquiryResponseDto SegmentInquiry(SegmentInquiryRequestDto segmentInquiryRequestDto);
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinde raporlama işlemi gerçekleştirir.
+        /// Bu yöntem, raporlama parametrelerini alarak işlem sonucunu döner.
+        /// </summary>
+        /// <param name="reportRequest">
+        /// Raporlama işlemi için gerekli olan parametreleri içeren bir <see cref="ReportRequestDto"/> nesnesi.
+        /// Bu nesne, raporlama işlemiyle ilgili hesap, sipariş ve tarih bilgilerini içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu içeren bir <see cref="ReportResponseDto"/> nesnesi döner.
+        /// Bu nesne, raporlama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
+        ReportResponseDto Report(ReportRequestDto reportRequest);
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinde EOD (End of Day) raporlama işlemi gerçekleştirir.
+        /// Bu yöntem, EOD raporlama parametrelerini alarak işlem sonucunu döner.
+        /// </summary>
+        /// <param name="eodRequest">
+        /// EOD raporlama işlemi için gerekli olan parametreleri içeren bir <see cref="EODRequestDto"/> nesnesi.
+        /// Bu nesne, raporlama işlemiyle ilgili hesap, başlangıç ve bitiş tarih bilgilerini içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu içeren bir <see cref="EODResponseDto"/> nesnesi döner.
+        /// Bu nesne, EOD raporlama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
+        EODResponseDto EOD(EODRequestDto eodRequest);
     }
 }

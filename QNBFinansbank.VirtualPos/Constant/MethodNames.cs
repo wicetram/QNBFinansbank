@@ -59,5 +59,15 @@
         /// Segment sorgulama işlemi metot adı.
         /// </summary>
         public const string SegmentInquiry = "Segment Inquiry";
+
+        /// <summary>
+        /// Raporlama işlemi metot adı.
+        /// </summary>
+        public const string Report = "Report";
+
+        /// <summary>
+        /// EOD Raporlama işlemi metot adı.
+        /// </summary>
+        public const string EOD = "EOD";
     }
 }
