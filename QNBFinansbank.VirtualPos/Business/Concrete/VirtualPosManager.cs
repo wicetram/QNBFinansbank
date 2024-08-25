@@ -4,6 +4,7 @@ using QNBFinansbank.VirtualPos.Constant;
 using QNBFinansbank.VirtualPos.Entity.Request;
 using QNBFinansbank.VirtualPos.Entity.Request.BatchClose;
 using QNBFinansbank.VirtualPos.Entity.Request.Campaign.Check;
+using QNBFinansbank.VirtualPos.Entity.Request.Campaign.Usage;
 using QNBFinansbank.VirtualPos.Entity.Request.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.EOD;
@@ -21,6 +22,7 @@ using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Usage;
 using QNBFinansbank.VirtualPos.Entity.Request.SegmentInquiry;
 using QNBFinansbank.VirtualPos.Entity.Response.BatchClose;
 using QNBFinansbank.VirtualPos.Entity.Response.Campaign.Check;
+using QNBFinansbank.VirtualPos.Entity.Response.Campaign.Usage;
 using QNBFinansbank.VirtualPos.Entity.Response.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Response.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.EOD;
@@ -1143,6 +1145,102 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 return new CampaignCheckResponseDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{campaignCheckRequest?.Account?.TxnType} işlemi sırasında tanımsız hata. Hata: {ex.Message}")
+                };
+            }
+        }
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinden kampanya kullanım işlemi gerçekleştirir.
+        /// Bu yöntem, kampanya kullanım isteği parametrelerini alarak işlemi başlatır ve işleme ilişkin sonucu döner.
+        /// </summary>
+        /// <param name="campaignUsageRequest">
+        /// Kampanya kullanım işlemi için gerekli olan parametreleri içeren bir <see cref="CampaignUsageRequestDto"/> nesnesi.
+        /// Bu nesne, kampanya kullanım işlemiyle ilgili hesap, sipariş, kart bilgileri, ek taksit ve erteleme seçeneklerini içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu içeren bir <see cref="CampaignUsageResponseDto"/> nesnesi döner.
+        /// Bu nesne, kampanya kullanım işleminin başarı durumunu, işlem sonucunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
+        public CampaignUsageResponseDto CampaignUsage(CampaignUsageRequestDto campaignUsageRequest)
+        {
+            try
+            {
+                // Kampanyalı ödeme isteği için gerekli DTO'nun oluşturulması.
+                var dto = new CampaignUsageRequestDataDto
+                {
+                    Lang = campaignUsageRequest?.Order?.Language,
+                    Currency = campaignUsageRequest?.Order?.Currency,
+                    OrderId = campaignUsageRequest?.Order?.OrderId,
+                    InstallmentCount = campaignUsageRequest?.Order?.Installment,
+
+                    Pan = campaignUsageRequest?.Card?.CardNo,
+                    Cvv2 = campaignUsageRequest?.Card?.CVC,
+                    Expiry = $"{campaignUsageRequest?.Card?.ExpireMonth}{campaignUsageRequest?.Card?.ExpireYear}",
+                    PurchAmount = campaignUsageRequest?.Order?.Amount,
+
+                    ArtiTaksitSayisi = campaignUsageRequest?.ExtraInstallmentCount,
+                    ArtiTaksitKampanyaKodu = campaignUsageRequest?.ExtraInstallmentCampaignCode,
+                    
+                    OtelemeSayisi = campaignUsageRequest?.DeferralCount,
+                    OtelemeKampanyaKodu = campaignUsageRequest?.DeferralCampaignCode,
+                    OptionalCampaign = campaignUsageRequest?.OptionalCampaign,
+                    SecmeliKampanyaDurumu = campaignUsageRequest?.SelectiveCampaignStatus,
+
+                    MbrId = campaignUsageRequest?.Account?.MbrId,
+                    MerchantId = campaignUsageRequest?.Account?.MerchantId,
+                    UserCode = campaignUsageRequest?.Account?.UserCode,
+                    UserPass = campaignUsageRequest?.Account?.UserPass,
+
+                    SecureType = campaignUsageRequest?.Account?.SecureType ?? SecureTypes.NonSecure,
+                    TxnType = campaignUsageRequest?.Account?.TxnType ?? TxnTypes.Auth,
+                };
+
+                var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, campaignUsageRequest?.Account?.BaseUrl);
+
+                // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
+                if (!response.IsSuccessful || string.IsNullOrEmpty(response.Content))
+                {
+                    return new CampaignUsageResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{campaignUsageRequest?.Account?.TxnType} işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.CampaignUsage, dto, response?.Content)
+                    };
+                }
+
+                // API yanıtının deserialization işlemi.
+                var result = XmlHelper.DeserializeFromXml<CampaignUsageResponseDataDto>(response.Content);
+                if (result == null)
+                {
+                    return new CampaignUsageResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{campaignUsageRequest?.Account?.TxnType} işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.CampaignUsage, dto, response?.Content)
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result.ProcReturnCode != Results.Approved)
+                {
+                    return new CampaignUsageResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{campaignUsageRequest?.Account?.TxnType} işlemi başarısız olmuştur."),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.CampaignUsage, dto, response?.Content)
+                    };
+                }
+
+                return new CampaignUsageResponseDto
+                {
+                    Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{campaignUsageRequest?.Account?.TxnType} işlemi başarılı."),
+                    CampaignUsage = result,
+                    ApiLog = SerializerHelper.ProcessData(MethodNames.CampaignUsage, dto, response?.Content)
+                };
+            }
+            catch (Exception ex)
+            {
+                // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
+                return new CampaignUsageResponseDto
+                {
+                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{campaignUsageRequest?.Account?.TxnType} işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
             }
         }

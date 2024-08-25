@@ -1,5 +1,6 @@
 ﻿using QNBFinansbank.VirtualPos.Entity.Request.BatchClose;
 using QNBFinansbank.VirtualPos.Entity.Request.Campaign.Check;
+using QNBFinansbank.VirtualPos.Entity.Request.Campaign.Usage;
 using QNBFinansbank.VirtualPos.Entity.Request.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.EOD;
@@ -14,6 +15,7 @@ using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Usage;
 using QNBFinansbank.VirtualPos.Entity.Request.SegmentInquiry;
 using QNBFinansbank.VirtualPos.Entity.Response.BatchClose;
 using QNBFinansbank.VirtualPos.Entity.Response.Campaign.Check;
+using QNBFinansbank.VirtualPos.Entity.Response.Campaign.Usage;
 using QNBFinansbank.VirtualPos.Entity.Response.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Response.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.EOD;
@@ -226,5 +228,19 @@ namespace QNBFinansbank.VirtualPos.Business.Abstract
         /// Bu nesne, kampanya kontrol işleminin başarı durumunu, işlem sonucunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
         CampaignCheckResponseDto CampaignCheck(CampaignCheckRequestDto campaignCheckRequest);
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinde kampanya kullanım işlemi gerçekleştirir.
+        /// Bu yöntem, kampanya kullanım parametrelerini alarak işlem sonucunu döner.
+        /// </summary>
+        /// <param name="campaignUsageRequestDto">
+        /// Kampanya kullanım işlemi için gerekli olan parametreleri içeren bir <see cref="CampaignUsageRequestDto"/> nesnesi.
+        /// Bu nesne, kampanya ile ilgili hesap, sipariş, kart bilgileri, ek taksit ve erteleme seçeneklerini içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu içeren bir <see cref="CampaignUsageResponseDto"/> nesnesi döner.
+        /// Bu nesne, kampanya kullanım işleminin başarı durumunu, işlem sonucunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
+        CampaignUsageResponseDto CampaignUsage(CampaignUsageRequestDto campaignUsageRequestDto);
     }
 }

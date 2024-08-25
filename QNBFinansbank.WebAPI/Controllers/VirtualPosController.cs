@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using QNBFinansbank.VirtualPos.Business.Abstract;
 using QNBFinansbank.VirtualPos.Entity.Request.Campaign.Check;
+using QNBFinansbank.VirtualPos.Entity.Request.Campaign.Usage;
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.EOD;
 using QNBFinansbank.VirtualPos.Entity.Request.Report;
@@ -55,6 +56,13 @@ namespace QNBFinansbank.WebAPI.Controllers
         public object CampaignCheck(CampaignCheckRequestDto campaignCheckRequestDto)
         {
             return _virtualPos.CampaignCheck(campaignCheckRequestDto);
+        }
+
+        [HttpPost]
+        [Route("campaignusage")]
+        public object CampaignUsage(CampaignUsageRequestDto campaignUsageRequest)
+        {
+            return _virtualPos.CampaignUsage(campaignUsageRequest);
         }
     }
 }

@@ -74,5 +74,10 @@
         /// Kampanya sorgulama işlemi metot adı.
         /// </summary>
         public const string CampaignCheck = "Campaign Check";
+
+        /// <summary>
+        /// Kampanyalı ödeme işlemi metot adı.
+        /// </summary>
+        public const string CampaignUsage = "Campaign Usage";
     }
 }
