@@ -1,7 +1,7 @@
 ﻿using QNBFinansbank.VirtualPos.Entity.Request.BatchClose;
 using QNBFinansbank.VirtualPos.Entity.Request.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
-using QNBFinansbank.VirtualPos.Entity.Request.EOD.QNBFinansbank.VirtualPos.Entity.Request.EOD;
+using QNBFinansbank.VirtualPos.Entity.Request.EOD;
 using QNBFinansbank.VirtualPos.Entity.Request.History;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.ThreeD.ModelPayment;
