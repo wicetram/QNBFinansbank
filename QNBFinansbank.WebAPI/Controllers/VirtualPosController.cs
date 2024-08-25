@@ -2,6 +2,7 @@
 using QNBFinansbank.VirtualPos.Business.Abstract;
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.EOD;
+using QNBFinansbank.VirtualPos.Entity.Request.Report;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Usage;
 
@@ -39,6 +40,13 @@ namespace QNBFinansbank.WebAPI.Controllers
         public object Eod(EODRequestDto eODRequest)
         {
             return _virtualPos.EOD(eODRequest);
+        }
+
+        [HttpPost]
+        [Route("report")]
+        public object Report(ReportRequestDto reportRequestDto)
+        {
+            return _virtualPos.Report(reportRequestDto);
         }
     }
 }

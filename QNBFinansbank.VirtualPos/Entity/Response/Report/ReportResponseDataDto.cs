@@ -1,28 +1,33 @@
-﻿using System.Xml.Serialization;
+﻿using System;
+using System.Collections.Generic;
+using System.Xml.Serialization;
 
 namespace QNBFinansbank.VirtualPos.Entity.Response.Report
 {
-    [XmlRoot(ElementName = "TxnHistoryReport")]
+    [XmlRoot(ElementName = "TxnHistoryReport", IsNullable = false)]
     public class ReportResponseDataDto : IDto
     {
         [XmlElement(ElementName = "PaymentRequestExtended")]
         public PaymentRequestExtended? PaymentRequestExtended { get; set; }
+
+        [XmlAttribute(AttributeName = "noNamespaceSchemaLocation", Namespace = "http://www.w3.org/2001/XMLSchema-instance")]
+        public string? NoNamespaceSchemaLocation { get; set; }
     }
 
-    [XmlRoot(ElementName = "PaymentRequestExtended")]
+    [XmlRoot(ElementName = "PaymentRequestExtended", IsNullable = false)]
     public class PaymentRequestExtended
     {
-        [XmlElement(ElementName = "PaymentRequest")]
+        [XmlElement(ElementName = "PaymentRequest", Namespace = "http://ocean.smartway.com/")]
         public PaymentRequest? PaymentRequest { get; set; }
 
-        [XmlElement(ElementName = "ExtraParameters")]
+        [XmlElement(ElementName = "ExtraParameters", Namespace = "http://ocean.smartway.com/")]
         public ExtraParameters? ExtraParameters { get; set; }
 
-        [XmlElement(ElementName = "IsOnUsCard")]
-        public IsOnUsCard? IsOnUsCard { get; set; }
+        [XmlElement(ElementName = "IsOnUsCard", Namespace = "http://ocean.smartway.com/")]
+        public bool IsOnUsCard { get; set; }
     }
 
-    [XmlRoot(ElementName = "PaymentRequest")]
+    [XmlRoot(ElementName = "PaymentRequest", Namespace = "http://ocean.smartway.com/", IsNullable = false)]
     public class PaymentRequest
     {
         [XmlElement(ElementName = "UseExistingDataWhenInserting")]
@@ -89,7 +94,7 @@ namespace QNBFinansbank.VirtualPos.Entity.Response.Report
         public string? PurchAmount { get; set; }
 
         [XmlElement(ElementName = "TxnAmount")]
-        public DateTime TxnAmount { get; set; }
+        public decimal TxnAmount { get; set; }
 
         [XmlElement(ElementName = "Exponent")]
         public string? Exponent { get; set; }
@@ -453,32 +458,23 @@ namespace QNBFinansbank.VirtualPos.Entity.Response.Report
 
         [XmlElement(ElementName = "AuthId")]
         public string? AuthId { get; set; }
-
-        [XmlAttribute(AttributeName = "xmlns")]
-        public string? Xmlns { get; set; }
-
-        [XmlText]
-        public string? Text { get; set; }
     }
 
-    [XmlRoot(ElementName = "IsOnUsCard")]
+    [XmlRoot(ElementName = "IsOnUsCard", Namespace = "http://ocean.smartway.com/")]
     public class IsOnUsCard
     {
-        [XmlAttribute(AttributeName = "xmlns")]
-        public string? Xmlns { get; set; }
-
         [XmlText]
-        public string? Text { get; set; }
+        public bool Text { get; set; }
     }
 
-    [XmlRoot(ElementName = "ExtraParameters")]
+    [XmlRoot(ElementName = "ExtraParameters", Namespace = "http://ocean.smartway.com/", IsNullable = false)]
     public class ExtraParameters
     {
         [XmlElement(ElementName = "ArrayOfString")]
         public List<ArrayOfString>? ArrayOfString { get; set; }
     }
 
-    [XmlRoot(ElementName = "ArrayOfString")]
+    [XmlRoot(ElementName = "ArrayOfString", Namespace = "http://ocean.smartway.com/", IsNullable = false)]
     public class ArrayOfString
     {
         [XmlElement(ElementName = "string")]
