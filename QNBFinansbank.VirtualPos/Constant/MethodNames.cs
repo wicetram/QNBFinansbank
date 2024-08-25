@@ -69,5 +69,10 @@
         /// EOD Raporlama işlemi metot adı.
         /// </summary>
         public const string EOD = "EOD";
+
+        /// <summary>
+        /// Kampanya sorgulama işlemi metot adı.
+        /// </summary>
+        public const string CampaignCheck = "Campaign Check";
     }
 }

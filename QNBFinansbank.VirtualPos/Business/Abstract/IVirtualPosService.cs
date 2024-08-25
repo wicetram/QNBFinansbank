@@ -1,4 +1,5 @@
 ﻿using QNBFinansbank.VirtualPos.Entity.Request.BatchClose;
+using QNBFinansbank.VirtualPos.Entity.Request.Campaign.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.EOD;
@@ -12,6 +13,7 @@ using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Usage;
 using QNBFinansbank.VirtualPos.Entity.Request.SegmentInquiry;
 using QNBFinansbank.VirtualPos.Entity.Response.BatchClose;
+using QNBFinansbank.VirtualPos.Entity.Response.Campaign.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Response.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.EOD;
@@ -210,5 +212,19 @@ namespace QNBFinansbank.VirtualPos.Business.Abstract
         /// Bu nesne, EOD raporlama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
         EODResponseDto EOD(EODRequestDto eodRequest);
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinde kampanya kontrol işlemi gerçekleştirir.
+        /// Bu yöntem, kampanya kontrol parametrelerini alarak işlem sonucunu döner.
+        /// </summary>
+        /// <param name="campaignCheckRequest">
+        /// Kampanya kontrol işlemi için gerekli olan parametreleri içeren bir <see cref="CampaignCheckRequestDto"/> nesnesi.
+        /// Bu nesne, kontrol edilecek kampanya ile ilgili hesap, sipariş ve kart bilgilerini içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu içeren bir <see cref="CampaignCheckResponseDto"/> nesnesi döner.
+        /// Bu nesne, kampanya kontrol işleminin başarı durumunu, işlem sonucunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
+        CampaignCheckResponseDto CampaignCheck(CampaignCheckRequestDto campaignCheckRequest);
     }
 }

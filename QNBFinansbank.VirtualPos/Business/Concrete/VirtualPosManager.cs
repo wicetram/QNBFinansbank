@@ -3,6 +3,7 @@ using QNBFinansbank.VirtualPos.Business.Abstract;
 using QNBFinansbank.VirtualPos.Constant;
 using QNBFinansbank.VirtualPos.Entity.Request;
 using QNBFinansbank.VirtualPos.Entity.Request.BatchClose;
+using QNBFinansbank.VirtualPos.Entity.Request.Campaign.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.EOD;
@@ -19,6 +20,7 @@ using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Usage;
 using QNBFinansbank.VirtualPos.Entity.Request.SegmentInquiry;
 using QNBFinansbank.VirtualPos.Entity.Response.BatchClose;
+using QNBFinansbank.VirtualPos.Entity.Response.Campaign.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Response.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.EOD;
@@ -1053,6 +1055,94 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 return new EODResponseDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{eodRequest?.Account?.TxnType} işlemi sırasında tanımsız hata. Hata: {ex.Message}")
+                };
+            }
+        }
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinde kampanya kontrol işlemi gerçekleştirir.
+        /// Bu yöntem, kampanya kontrol parametrelerini alarak işlem sonucunu döner.
+        /// </summary>
+        /// <param name="campaignCheckRequest">
+        /// Kampanya kontrol işlemi için gerekli olan parametreleri içeren bir <see cref="CampaignCheckRequestDto"/> nesnesi.
+        /// Bu nesne, kontrol edilecek kampanya ile ilgili hesap, sipariş ve kart bilgilerini içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu içeren bir <see cref="CampaignCheckResponseDto"/> nesnesi döner.
+        /// Bu nesne, kampanya kontrol işleminin başarı durumunu, işlem sonucunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
+        public CampaignCheckResponseDto CampaignCheck(CampaignCheckRequestDto campaignCheckRequest)
+        {
+            try
+            {
+                // Kampanya sorgulama isteği için gerekli DTO'nun oluşturulması.
+                var dto = new CampaignCheckRequestDataDto
+                {
+                    Lang = campaignCheckRequest?.Order?.Language,
+                    Currency = campaignCheckRequest?.Order?.Currency,
+                    OrderId = campaignCheckRequest?.Order?.OrderId,
+                    InstallmentCount = campaignCheckRequest?.Order?.Installment,
+
+                    Pan = campaignCheckRequest?.Card?.CardNo,
+                    Cvv2 = campaignCheckRequest?.Card?.CVC,
+                    Expiry = $"{campaignCheckRequest?.Card?.ExpireMonth}{campaignCheckRequest?.Card?.ExpireYear}",
+                    PurchAmount = campaignCheckRequest?.Order?.Amount,
+
+                    MbrId = campaignCheckRequest?.Account?.MbrId,
+                    MerchantId = campaignCheckRequest?.Account?.MerchantId,
+                    UserCode = campaignCheckRequest?.Account?.UserCode,
+                    UserPass = campaignCheckRequest?.Account?.UserPass,
+
+                    SecureType = campaignCheckRequest?.Account?.SecureType ?? SecureTypes.Inquiry,
+                    TxnType = campaignCheckRequest?.Account?.TxnType ?? TxnTypes.OptCampaignInquiry,
+                };
+
+                var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, campaignCheckRequest?.Account?.BaseUrl);
+
+                // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
+                if (!response.IsSuccessful || string.IsNullOrEmpty(response.Content))
+                {
+                    return new CampaignCheckResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{campaignCheckRequest?.Account?.TxnType} işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.CampaignCheck, dto, response?.Content)
+                    };
+                }
+
+                // API yanıtının deserialization işlemi.
+                var result = XmlHelper.DeserializeFromXml<CampaignCheckResponseDataDto>(response.Content);
+                if (result == null)
+                {
+                    return new CampaignCheckResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{campaignCheckRequest?.Account?.TxnType} işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.CampaignCheck, dto, response?.Content)
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result.ProcReturnCode != Results.Approved)
+                {
+                    return new CampaignCheckResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{campaignCheckRequest?.Account?.TxnType} işlemi başarısız olmuştur."),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.CampaignCheck, dto, response?.Content)
+                    };
+                }
+
+                return new CampaignCheckResponseDto
+                {
+                    Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{campaignCheckRequest?.Account?.TxnType} işlemi başarılı."),
+                    CampaignCheck = result,
+                    ApiLog = SerializerHelper.ProcessData(MethodNames.CampaignCheck, dto, response?.Content)
+                };
+            }
+            catch (Exception ex)
+            {
+                // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
+                return new CampaignCheckResponseDto
+                {
+                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{campaignCheckRequest?.Account?.TxnType} işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
             }
         }
