@@ -4,6 +4,7 @@ using QNBFinansbank.VirtualPos.Entity.Request.Campaign.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.Campaign.Usage;
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.EOD;
+using QNBFinansbank.VirtualPos.Entity.Request.History;
 using QNBFinansbank.VirtualPos.Entity.Request.Report;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Usage;

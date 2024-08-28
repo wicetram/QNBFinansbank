@@ -79,5 +79,15 @@
         /// Kampanyalı ödeme işlemi metot adı.
         /// </summary>
         public const string CampaignUsage = "Campaign Usage";
+
+        /// <summary>
+        /// Tekrarlı ödeme işlemi metot adı.
+        /// </summary>
+        public const string RecurringPayment = "Recurring Payment";
+
+        /// <summary>
+        /// Tekrarlı ödeme kontrol işlemi metot adı.
+        /// </summary>
+        public const string CheckRecurringPayment = "Check Recurring Payment";
     }
 }

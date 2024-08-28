@@ -76,6 +76,16 @@
         /// Segment sorgulama işlemi.
         /// </summary>
         public const string SegmentInquiry = "SegmentInquiry";
+
+        /// <summary>
+        /// Tekrarlı ödeme işlemi.
+        /// </summary>
+        public const string RecurringPayment = "RECURRINGPAYMENT";
+
+        /// <summary>
+        /// Tekrarlı ödeme kontrol işlemi.
+        /// </summary>
+        public const string CheckRecurringPayment = "CPOSINQUIRY";
     }
 
 }

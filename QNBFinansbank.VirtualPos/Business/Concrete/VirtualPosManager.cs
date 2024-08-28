@@ -8,13 +8,14 @@ using QNBFinansbank.VirtualPos.Entity.Request.Campaign.Usage;
 using QNBFinansbank.VirtualPos.Entity.Request.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.EOD;
-using QNBFinansbank.VirtualPos.Entity.Request.History;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.NonSecure;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.PaymentFacilicator;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.ThreeD;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Request.PreAuth;
+using QNBFinansbank.VirtualPos.Entity.Request.RecurringPayment.Check;
+using QNBFinansbank.VirtualPos.Entity.Request.RecurringPayment.Payment;
 using QNBFinansbank.VirtualPos.Entity.Request.Refund;
 using QNBFinansbank.VirtualPos.Entity.Request.Report;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Check;
@@ -26,11 +27,12 @@ using QNBFinansbank.VirtualPos.Entity.Response.Campaign.Usage;
 using QNBFinansbank.VirtualPos.Entity.Response.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Response.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.EOD;
-using QNBFinansbank.VirtualPos.Entity.Response.History;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment.NonSecure;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Response.PreAuth;
+using QNBFinansbank.VirtualPos.Entity.Response.RecurringPayment.Check;
+using QNBFinansbank.VirtualPos.Entity.Response.RecurringPayment.Payment;
 using QNBFinansbank.VirtualPos.Entity.Response.Refund;
 using QNBFinansbank.VirtualPos.Entity.Response.Report;
 using QNBFinansbank.VirtualPos.Entity.Response.RewardPoints.Check;
@@ -643,91 +645,6 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         }
 
         /// <summary>
-        /// QNB Finansbank Sanal Pos üzerinden işlem geçmişini sorgular.
-        /// Bu yöntem, işlem geçmişi sorgulama parametrelerini alarak işlem sonucunu döner.
-        /// </summary>
-        /// <param name="historyRequestDataDto">
-        /// İşlem geçmişi sorgulama işlemi için gerekli olan parametreleri içeren bir <see cref="HistoryRequestDto"/> nesnesi.
-        /// Bu nesne, sorgulama işlemiyle ilgili hesap, sipariş ve tarih bilgilerini içerebilir.
-        /// </param>
-        /// <returns>
-        /// İşlemin sonucunu içeren bir <see cref="HistoryResponseDto"/> nesnesi döner.
-        /// Bu nesne, işlem geçmişi sorgulama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
-        /// </returns>
-        public HistoryResponseDto History(HistoryRequestDto historyRequestDataDto)
-        {
-            try
-            {
-                // İşlem geçmişi sorgulama isteği için gerekli DTO'nun oluşturulması.
-                var dto = new HistoryRequestDataDto
-                {
-                    Currency = historyRequestDataDto?.Order?.Currency,
-                    Lang = historyRequestDataDto?.Order?.Language,
-                    OrderId = historyRequestDataDto?.Order?.OrderId,
-
-                    ReqDate = historyRequestDataDto?.RequestDate,
-                    RequestStartDatetime = historyRequestDataDto?.RequestStartDatetime,
-
-                    MbrId = historyRequestDataDto?.Account?.MbrId,
-                    MerchantID = historyRequestDataDto?.Account?.MerchantId,
-                    UserCode = historyRequestDataDto?.Account?.UserCode,
-                    UserPass = historyRequestDataDto?.Account?.UserPass,
-
-                    SecureType = historyRequestDataDto?.Account?.SecureType ?? SecureTypes.Report,
-                    TxnType = historyRequestDataDto?.Account?.TxnType ?? TxnTypes.TxnHistory,
-                };
-
-                var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, historyRequestDataDto?.Account?.BaseUrl);
-
-                // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
-                if (!response.IsSuccessful || string.IsNullOrEmpty(response.Content))
-                {
-                    return new HistoryResponseDto
-                    {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}"),
-                        ApiLog = SerializerHelper.ProcessData(MethodNames.History, dto, response?.Content)
-                    };
-                }
-
-                // API yanıtının deserialization işlemi.
-                var result = XmlHelper.DeserializeFromXml<HistoryResponseDataDto>(response.Content);
-                if (result == null)
-                {
-                    return new HistoryResponseDto
-                    {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
-                        ApiLog = SerializerHelper.ProcessData(MethodNames.History, dto, response?.Content)
-                    };
-                }
-
-                // İşlemin başarı koduna göre sonuç döndürülmesi.
-                if (result?.PaymentRequest?.ProcReturnCode != Results.Approved)
-                {
-                    return new HistoryResponseDto
-                    {
-                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi başarısız olmuştur. Hata Kodu: {result?.PaymentRequest?.ProcReturnCode} | Hata Mesajı: {result?.PaymentRequest?.ErrMsg}"),
-                        ApiLog = SerializerHelper.ProcessData(MethodNames.History, dto, response?.Content)
-                    };
-                }
-
-                return new HistoryResponseDto
-                {
-                    Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi başarılı."),
-                    History = result,
-                    ApiLog = SerializerHelper.ProcessData(MethodNames.History, dto, response?.Content)
-                };
-            }
-            catch (Exception ex)
-            {
-                // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
-                return new HistoryResponseDto
-                {
-                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{historyRequestDataDto?.Account?.SecureType} ödeme işlemi sırasında tanımsız hata. Hata: {ex.Message}")
-                };
-            }
-        }
-
-        /// <summary>
         /// QNB Finansbank Sanal Pos üzerinden toplu kapama (batch close) işlemini gerçekleştirir.
         /// Bu yöntem, toplu kapama parametrelerini alarak işlem sonucunu döner.
         /// </summary>
@@ -1180,7 +1097,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
 
                     ArtiTaksitSayisi = campaignUsageRequest?.ExtraInstallmentCount,
                     ArtiTaksitKampanyaKodu = campaignUsageRequest?.ExtraInstallmentCampaignCode,
-                    
+
                     OtelemeSayisi = campaignUsageRequest?.DeferralCount,
                     OtelemeKampanyaKodu = campaignUsageRequest?.DeferralCampaignCode,
                     OptionalCampaign = campaignUsageRequest?.OptionalCampaign,
@@ -1241,6 +1158,178 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 return new CampaignUsageResponseDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{campaignUsageRequest?.Account?.TxnType} işlemi sırasında tanımsız hata. Hata: {ex.Message}")
+                };
+            }
+        }
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinde tekrarlı ödeme işlemini gerçekleştirir.
+        /// Bu yöntem, tekrarlı ödeme parametrelerini alarak işlemi başlatır ve işleme ilişkin sonucu döner.
+        /// </summary>
+        /// <param name="recurringPaymentRequestDto">
+        /// Tekrarlı ödeme işlemini başlatmak için gerekli olan parametreleri içeren bir <see cref="RecurringPaymentRequestDto"/> nesnesi.
+        /// Bu nesne, ödeme işlemine ait hesap, sipariş, kart bilgileri ve tekrarlama bilgilerini içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu ve ilgili bilgileri içeren bir <see cref="RecurringPaymentResponseDto"/> nesnesi döner.
+        /// Bu nesne, tekrarlı ödeme işleminin başarı durumunu, işlem sonucunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
+        public RecurringPaymentResponseDto RecurringPayment(RecurringPaymentRequestDto recurringPaymentRequestDto)
+        {
+            try
+            {
+                // Tekrarlı ödeme isteği için gerekli DTO'nun oluşturulması.
+                var dto = new RecurringPaymentRequestDataDto
+                {
+                    Lang = recurringPaymentRequestDto?.Order?.Language,
+                    Currency = recurringPaymentRequestDto?.Order?.Currency,
+                    MrcOrderId = recurringPaymentRequestDto?.Order?.OrderId,
+                    InstallmentCount = recurringPaymentRequestDto?.Order?.Installment,
+                    PurchAmount = recurringPaymentRequestDto?.Order?.Amount,
+
+                    Pan = recurringPaymentRequestDto?.Card?.CardNo,
+                    Expiry = $"{recurringPaymentRequestDto?.Card?.ExpireMonth}{recurringPaymentRequestDto?.Card?.ExpireYear}",
+                    CardHolderName = recurringPaymentRequestDto?.Card?.CardHolderName,
+                    Description = recurringPaymentRequestDto?.Description,
+                    StartDate = recurringPaymentRequestDto?.StartDate.ToString("yyMMdd"),
+                    IntervalDuration = recurringPaymentRequestDto?.IntervalDuration,
+                    IntervalType = recurringPaymentRequestDto?.IntervalType,
+                    RepeatCount = recurringPaymentRequestDto?.RepeatCount,
+                    RequestType = TxnTypes.RecurringPayment,
+
+                    MbrId = recurringPaymentRequestDto?.Account?.MbrId,
+                    MerchantId = recurringPaymentRequestDto?.Account?.MerchantId,
+                    UserCode = recurringPaymentRequestDto?.Account?.UserCode,
+                    UserPass = recurringPaymentRequestDto?.Account?.UserPass,
+                };
+
+                var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, recurringPaymentRequestDto?.Account?.BaseUrl);
+
+                // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
+                if (!response.IsSuccessful || string.IsNullOrEmpty(response.Content))
+                {
+                    return new RecurringPaymentResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{recurringPaymentRequestDto?.Account?.TxnType} işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.RecurringPayment, dto, response?.Content)
+                    };
+                }
+
+                // API yanıtının deserialization işlemi.
+                var result = XmlHelper.DeserializeFromXml<RecurringPaymentResponseDataDto>(response.Content);
+                if (result == null)
+                {
+                    return new RecurringPaymentResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{recurringPaymentRequestDto?.Account?.TxnType} işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.RecurringPayment, dto, response?.Content)
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result.ProcReturnCode != Results.Approved)
+                {
+                    return new RecurringPaymentResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{recurringPaymentRequestDto?.Account?.TxnType} işlemi başarısız olmuştur."),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.RecurringPayment, dto, response?.Content)
+                    };
+                }
+
+                return new RecurringPaymentResponseDto
+                {
+                    Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{recurringPaymentRequestDto?.Account?.TxnType} işlemi başarılı."),
+                    RecurringPayment = result,
+                    ApiLog = SerializerHelper.ProcessData(MethodNames.RecurringPayment, dto, response?.Content)
+                };
+            }
+            catch (Exception ex)
+            {
+                // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
+                return new RecurringPaymentResponseDto
+                {
+                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{recurringPaymentRequestDto?.Account?.TxnType} işlemi sırasında tanımsız hata. Hata: {ex.Message}")
+                };
+            }
+        }
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinde tekrarlı ödeme kontrol işlemini gerçekleştirir.
+        /// Bu metot, verilen <see cref="CheckRecurringPaymentRequestDto"/> nesnesi ile tekrarlı ödeme kontrol işlemi başlatır,
+        /// API çağrısını gerçekleştirir, yanıtı işler ve sonucu <see cref="CheckRecurringPaymentResponseDto"/> olarak döner.
+        /// </summary>
+        /// <param name="checkRecurringPaymentRequestDto">
+        /// Tekrarlı ödeme kontrol işlemi için gerekli olan parametreleri içeren <see cref="CheckRecurringPaymentRequestDto"/> nesnesi.
+        /// Bu nesne, işlemle ilgili hesap, sipariş ve rehber bilgilerini içerir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu ve ilgili bilgileri içeren <see cref="CheckRecurringPaymentResponseDto"/> nesnesi döner.
+        /// İşlem başarılıysa, <see cref="CheckRecurringPaymentResponseDto.Result"/> alanı başarılı olarak döner. 
+        /// İşlem başarısızsa, hata kodu ve mesajı ile birlikte döner.
+        /// </returns>
+        public CheckRecurringPaymentResponseDto CheckRecurringPayment(CheckRecurringPaymentRequestDto checkRecurringPaymentRequestDto)
+        {
+            try
+            {
+                // Tekrarlı ödeme kontrol isteği için gerekli DTO'nun oluşturulması.
+                var dto = new CheckRecurringPaymentRequestDataDto
+                {
+                    MrcOrderId = checkRecurringPaymentRequestDto?.Order?.OrderId,
+                    InstOrderGuid = checkRecurringPaymentRequestDto?.InstOrderGuid,
+                    RequestType = TxnTypes.CheckRecurringPayment,
+
+                    MbrId = checkRecurringPaymentRequestDto?.Account?.MbrId,
+                    MerchantId = checkRecurringPaymentRequestDto?.Account?.MerchantId,
+                    UserCode = checkRecurringPaymentRequestDto?.Account?.UserCode,
+                    UserPass = checkRecurringPaymentRequestDto?.Account?.UserPass,
+                };
+
+                var response = RestClientHelper.RestXmlExecuteHelper(dto, Method.Post, checkRecurringPaymentRequestDto?.Account?.BaseUrl);
+
+                // Yanıtın başarı durumuna göre işlem sonucunun döndürülmesi.
+                if (!response.IsSuccessful || string.IsNullOrEmpty(response.Content))
+                {
+                    return new CheckRecurringPaymentResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{checkRecurringPaymentRequestDto?.Account?.TxnType} işlemi başarısız. Hata detayı: {response?.StatusCode} | {response?.ErrorException?.Message ?? response?.ErrorMessage}"),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.CheckRecurringPayment, dto, response?.Content)
+                    };
+                }
+
+                // API yanıtının deserialization işlemi.
+                var result = XmlHelper.DeserializeFromXml<CheckRecurringPaymentResponseDataDto>(response.Content);
+                if (result == null)
+                {
+                    return new CheckRecurringPaymentResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{checkRecurringPaymentRequestDto?.Account?.TxnType} işlemi cevabı deserileştirilemediği için işlem başarısız olmuştur."),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.CheckRecurringPayment, dto, response?.Content)
+                    };
+                }
+
+                // İşlemin başarı koduna göre sonuç döndürülmesi.
+                if (result.ProcReturnCode != Results.Approved)
+                {
+                    return new CheckRecurringPaymentResponseDto
+                    {
+                        Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{checkRecurringPaymentRequestDto?.Account?.TxnType} işlemi başarısız olmuştur."),
+                        ApiLog = SerializerHelper.ProcessData(MethodNames.CheckRecurringPayment, dto, response?.Content)
+                    };
+                }
+
+                return new CheckRecurringPaymentResponseDto
+                {
+                    Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, $"{checkRecurringPaymentRequestDto?.Account?.TxnType} işlemi başarılı."),
+                    CheckRecurringPayment = result,
+                    ApiLog = SerializerHelper.ProcessData(MethodNames.CheckRecurringPayment, dto, response?.Content)
+                };
+            }
+            catch (Exception ex)
+            {
+                // Beklenmeyen bir hata meydana gelirse, hata mesajıyla birlikte sonuç döndürülmesi.
+                return new CheckRecurringPaymentResponseDto
+                {
+                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{checkRecurringPaymentRequestDto?.Account?.TxnType} işlemi sırasında tanımsız hata. Hata: {ex.Message}")
                 };
             }
         }

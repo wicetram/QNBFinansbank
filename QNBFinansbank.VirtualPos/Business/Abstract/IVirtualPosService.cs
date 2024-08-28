@@ -8,6 +8,8 @@ using QNBFinansbank.VirtualPos.Entity.Request.History;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Request.PreAuth;
+using QNBFinansbank.VirtualPos.Entity.Request.RecurringPayment.Check;
+using QNBFinansbank.VirtualPos.Entity.Request.RecurringPayment.Payment;
 using QNBFinansbank.VirtualPos.Entity.Request.Refund;
 using QNBFinansbank.VirtualPos.Entity.Request.Report;
 using QNBFinansbank.VirtualPos.Entity.Request.RewardPoints.Check;
@@ -23,6 +25,8 @@ using QNBFinansbank.VirtualPos.Entity.Response.History;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Response.PreAuth;
+using QNBFinansbank.VirtualPos.Entity.Response.RecurringPayment.Check;
+using QNBFinansbank.VirtualPos.Entity.Response.RecurringPayment.Payment;
 using QNBFinansbank.VirtualPos.Entity.Response.Refund;
 using QNBFinansbank.VirtualPos.Entity.Response.Report;
 using QNBFinansbank.VirtualPos.Entity.Response.RewardPoints.Check;
@@ -149,15 +153,15 @@ namespace QNBFinansbank.VirtualPos.Business.Abstract
         /// QNB Finansbank Sanal Pos üzerinde işlem geçmişini sorgular.
         /// Bu yöntem, işlem geçmişi sorgulama parametrelerini alarak işlem sonucunu döner.
         /// </summary>
-        /// <param name="historyRequestDataDto">
-        /// İşlem geçmişi sorgulama işlemi için gerekli olan parametreleri içeren bir <see cref="HistoryRequestDto"/> nesnesi.
+        /// <param name="reportRequestDto">
+        /// İşlem geçmişi sorgulama işlemi için gerekli olan parametreleri içeren bir <see cref="ReportRequestDto"/> nesnesi.
         /// Bu nesne, sorgulama işlemiyle ilgili hesap, sipariş ve sorgulama tarih bilgilerini içerebilir.
         /// </param>
         /// <returns>
-        /// İşlemin sonucunu içeren bir <see cref="HistoryResponseDto"/> nesnesi döner.
+        /// İşlemin sonucunu içeren bir <see cref="ReportResponseDto"/> nesnesi döner.
         /// Bu nesne, işlem geçmişi sorgulama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
-        HistoryResponseDto History(HistoryRequestDto historyRequestDataDto);
+        ReportResponseDto Report(ReportRequestDto reportRequestDto);
 
         /// <summary>
         /// QNB Finansbank Sanal Pos üzerinde toplu kapama (batch close) işlemini gerçekleştirir.
@@ -186,20 +190,6 @@ namespace QNBFinansbank.VirtualPos.Business.Abstract
         /// Bu nesne, segment sorgulama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
         SegmentInquiryResponseDto SegmentInquiry(SegmentInquiryRequestDto segmentInquiryRequestDto);
-
-        /// <summary>
-        /// QNB Finansbank Sanal Pos üzerinde raporlama işlemi gerçekleştirir.
-        /// Bu yöntem, raporlama parametrelerini alarak işlem sonucunu döner.
-        /// </summary>
-        /// <param name="reportRequest">
-        /// Raporlama işlemi için gerekli olan parametreleri içeren bir <see cref="ReportRequestDto"/> nesnesi.
-        /// Bu nesne, raporlama işlemiyle ilgili hesap, sipariş ve tarih bilgilerini içerebilir.
-        /// </param>
-        /// <returns>
-        /// İşlemin sonucunu içeren bir <see cref="ReportResponseDto"/> nesnesi döner.
-        /// Bu nesne, raporlama işleminin sonucunu, başarı durumunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
-        /// </returns>
-        ReportResponseDto Report(ReportRequestDto reportRequest);
 
         /// <summary>
         /// QNB Finansbank Sanal Pos üzerinde EOD (End of Day) raporlama işlemi gerçekleştirir.
@@ -242,5 +232,33 @@ namespace QNBFinansbank.VirtualPos.Business.Abstract
         /// Bu nesne, kampanya kullanım işleminin başarı durumunu, işlem sonucunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
         CampaignUsageResponseDto CampaignUsage(CampaignUsageRequestDto campaignUsageRequestDto);
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinde tekrarlı ödeme işlemini gerçekleştirir.
+        /// Bu yöntem, tekrarlı ödeme parametrelerini alarak işlemi başlatır ve işleme ilişkin sonucu döner.
+        /// </summary>
+        /// <param name="recurringPaymentRequestDto">
+        /// Tekrarlı ödeme işlemini başlatmak için gerekli olan parametreleri içeren bir <see cref="RecurringPaymentRequestDto"/> nesnesi.
+        /// Bu nesne, ödeme işlemine ait hesap, sipariş ve kart bilgilerini içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu içeren bir <see cref="RecurringPaymentResponseDto"/> nesnesi döner.
+        /// Bu nesne, tekrarlı ödeme işleminin başarı durumunu, işlem sonucunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
+        RecurringPaymentResponseDto RecurringPayment(RecurringPaymentRequestDto recurringPaymentRequestDto);
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinde tekrarlı ödeme kontrol işlemini gerçekleştirir.
+        /// Bu yöntem, tekrarlı ödeme kontrol parametrelerini alarak işlemi başlatır ve işleme ilişkin sonucu döner.
+        /// </summary>
+        /// <param name="checkRecurringPaymentRequestDto">
+        /// Tekrarlı ödeme kontrol işlemi için gerekli olan parametreleri içeren bir <see cref="CheckRecurringPaymentRequestDto"/> nesnesi.
+        /// Bu nesne, ödeme işlemine ait hesap, sipariş ve işlem rehberi bilgilerini içerebilir.
+        /// </param>
+        /// <returns>
+        /// İşlemin sonucunu ve ilgili bilgileri içeren bir <see cref="CheckRecurringPaymentResponseDto"/> nesnesi döner.
+        /// Bu nesne, tekrarlı ödeme kontrol işleminin başarı durumunu, işlem sonucunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
+        /// </returns>
+        CheckRecurringPaymentResponseDto CheckRecurringPayment(CheckRecurringPaymentRequestDto checkRecurringPaymentRequestDto);
     }
 }
