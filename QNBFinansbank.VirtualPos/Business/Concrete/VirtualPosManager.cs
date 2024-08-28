@@ -1353,26 +1353,28 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         /// </returns>
         public PaymentHashResponseDto HashControl(PaymentHashControlRequestDto paymentHashControlRequestDto)
         {
+            if (paymentHashControlRequestDto == null)
+            {
+                return new PaymentHashResponseDto
+                {
+                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, "HASH parametre hatası.")
+                };
+            }
+
             string hashString = $"{paymentHashControlRequestDto.MerchantId}{paymentHashControlRequestDto.MerchantPass}{paymentHashControlRequestDto.OrderId}{paymentHashControlRequestDto.AuthCode}{paymentHashControlRequestDto.ProcReturnCode}{paymentHashControlRequestDto.ThreeDStatus}{paymentHashControlRequestDto.ResponseRandom}{paymentHashControlRequestDto.UserCode}";
-            string hash = CryptoManager.SHA1Encryption(hashString);
-            if (hash == paymentHashControlRequestDto?.BankHash)
+
+            string calculatedHash = CryptoManager.SHA1Encryption(hashString);
+
+            bool validHash = calculatedHash == paymentHashControlRequestDto.BankHash;
+            string resultMessage = validHash ? "HASH kontrolü başarılı." : "HASH kontrolü başarısız.";
+            int resultCode = validHash ? ResultCode.SuccessCode : ResultCode.FailCode;
+
+            return new PaymentHashResponseDto
             {
-                return new PaymentHashResponseDto
-                {
-                    Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, "HASH kontrol işlemi başarılı"),
-                    BankHash = paymentHashControlRequestDto?.BankHash,
-                    CreatedHash = hash
-                };
-            }
-            else
-            {
-                return new PaymentHashResponseDto
-                {
-                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, "HASH kontrol işlemi başarısız."),
-                    BankHash = paymentHashControlRequestDto?.BankHash,
-                    CreatedHash = hash
-                };
-            }
+                Result = ResponseHandler.GetResult(validHash, resultCode, resultMessage),
+                BankHash = paymentHashControlRequestDto.BankHash,
+                CreatedHash = calculatedHash
+            };
         }
 
         /// <summary>
