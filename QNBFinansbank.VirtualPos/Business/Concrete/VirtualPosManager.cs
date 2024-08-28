@@ -9,6 +9,7 @@ using QNBFinansbank.VirtualPos.Entity.Request.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Request.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.EOD;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment;
+using QNBFinansbank.VirtualPos.Entity.Request.Payment.Hash;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.NonSecure;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.PaymentFacilicator;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.ThreeD;
@@ -28,6 +29,7 @@ using QNBFinansbank.VirtualPos.Entity.Response.Cancel;
 using QNBFinansbank.VirtualPos.Entity.Response.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.EOD;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment;
+using QNBFinansbank.VirtualPos.Entity.Response.Payment.Hash;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment.NonSecure;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Response.PreAuth;
@@ -1330,6 +1332,45 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                 return new CheckRecurringPaymentResponseDto
                 {
                     Result = ResponseHandler.GetResult(false, ResultCode.FailCode, $"{checkRecurringPaymentRequestDto?.Account?.TxnType} işlemi sırasında tanımsız hata. Hata: {ex.Message}")
+                };
+            }
+        }
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinde HASH kontrol işlemini gerçekleştirir.
+        /// Bu metot, verilen <see cref="PaymentHashControlRequestDto"/> nesnesi ile HASH kontrol işlemi başlatır,
+        /// gelen verilerin hash değerini hesaplar ve bankadan gelen hash değeri ile karşılaştırır.
+        /// İşlem sonucunu <see cref="PaymentHashResponseDto"/> olarak döner.
+        /// </summary>
+        /// <param name="paymentHashControlRequestDto">
+        /// HASH kontrol işlemi için gerekli olan parametreleri içeren <see cref="PaymentHashControlRequestDto"/> nesnesi.
+        /// Bu nesne, işlemle ilgili hesap, sipariş, otorizasyon kodu, işlem sonucu ve rastgele oluşturulmuş değeri içerir.
+        /// </param>
+        /// <returns>
+        /// HASH kontrolünün sonucunu ve ilgili bilgileri içeren <see cref="PaymentHashResponseDto"/> nesnesi döner.
+        /// HASH kontrolü başarılıysa, <see cref="PaymentHashResponseDto.Result"/> alanı başarılı olarak döner.
+        /// HASH kontrolü başarısızsa, hata kodu ve mesajı ile birlikte döner.
+        /// </returns>
+        public PaymentHashResponseDto HashControl(PaymentHashControlRequestDto paymentHashControlRequestDto)
+        {
+            string hashString = $"{paymentHashControlRequestDto.MerchantId}{paymentHashControlRequestDto.MerchantPass}{paymentHashControlRequestDto.OrderId}{paymentHashControlRequestDto.AuthCode}{paymentHashControlRequestDto.ProcReturnCode}{paymentHashControlRequestDto.ThreeDStatus}{paymentHashControlRequestDto.ResponseRandom}{paymentHashControlRequestDto.UserCode}";
+            string hash = CryptoManager.SHA1Encryption(hashString);
+            if (hash == paymentHashControlRequestDto?.BankHash)
+            {
+                return new PaymentHashResponseDto
+                {
+                    Result = ResponseHandler.GetResult(true, ResultCode.SuccessCode, "HASH kontrol işlemi başarılı"),
+                    BankHash = paymentHashControlRequestDto?.BankHash,
+                    CreatedHash = hash
+                };
+            }
+            else
+            {
+                return new PaymentHashResponseDto
+                {
+                    Result = ResponseHandler.GetResult(false, ResultCode.FailCode, "HASH kontrol işlemi başarısız."),
+                    BankHash = paymentHashControlRequestDto?.BankHash,
+                    CreatedHash = hash
                 };
             }
         }

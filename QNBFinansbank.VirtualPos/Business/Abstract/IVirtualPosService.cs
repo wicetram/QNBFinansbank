@@ -6,6 +6,7 @@ using QNBFinansbank.VirtualPos.Entity.Request.Check;
 using QNBFinansbank.VirtualPos.Entity.Request.EOD;
 using QNBFinansbank.VirtualPos.Entity.Request.History;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment;
+using QNBFinansbank.VirtualPos.Entity.Request.Payment.Hash;
 using QNBFinansbank.VirtualPos.Entity.Request.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Request.PreAuth;
 using QNBFinansbank.VirtualPos.Entity.Request.RecurringPayment.Check;
@@ -23,6 +24,7 @@ using QNBFinansbank.VirtualPos.Entity.Response.Check;
 using QNBFinansbank.VirtualPos.Entity.Response.EOD;
 using QNBFinansbank.VirtualPos.Entity.Response.History;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment;
+using QNBFinansbank.VirtualPos.Entity.Response.Payment.Hash;
 using QNBFinansbank.VirtualPos.Entity.Response.Payment.ThreeD.ModelPayment;
 using QNBFinansbank.VirtualPos.Entity.Response.PreAuth;
 using QNBFinansbank.VirtualPos.Entity.Response.RecurringPayment.Check;
@@ -260,5 +262,20 @@ namespace QNBFinansbank.VirtualPos.Business.Abstract
         /// Bu nesne, tekrarlı ödeme kontrol işleminin başarı durumunu, işlem sonucunu, hata mesajlarını ve diğer ilgili bilgileri içerir.
         /// </returns>
         CheckRecurringPaymentResponseDto CheckRecurringPayment(CheckRecurringPaymentRequestDto checkRecurringPaymentRequestDto);
+
+        /// <summary>
+        /// QNB Finansbank Sanal Pos üzerinde ödeme işlemi sırasında hash kontrolü yapar.
+        /// Bu yöntem, verilen <see cref="PaymentHashControlRequestDto"/> nesnesindeki bilgileri kullanarak hash değerlerini kontrol eder ve
+        /// sonuçları bir <see cref="PaymentHashResponseDto"/> nesnesi olarak döner.
+        /// </summary>
+        /// <param name="paymentHashControlRequestDto">
+        /// Hash kontrol işlemi için gerekli olan parametreleri içeren <see cref="PaymentHashControlRequestDto"/> nesnesi.
+        /// Bu nesne, hash kontrolü için işlem bilgilerini içerir.
+        /// </param>
+        /// <returns>
+        /// Hash kontrolü sonucunu ve ilgili hash değerlerini içeren <see cref="PaymentHashResponseDto"/> nesnesi döner.
+        /// Bu nesne, oluşturulan hash değeri, bankadan gelen hash değeri ve işlem sonucunu içerir.
+        /// </returns>
+        PaymentHashResponseDto HashControl(PaymentHashControlRequestDto paymentHashControlRequestDto);
     }
 }
