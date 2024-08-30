@@ -43,6 +43,7 @@ using QNBFinansbank.VirtualPos.Entity.Response.SegmentInquiry;
 using QNBFinansbank.VirtualPos.Utility;
 using QNBFinansbank.VirtualPos.Utility.ApiClient;
 using QNBFinansbank.VirtualPos.Utility.Cryptography;
+using QNBFinansbank.VirtualPos.Utility.Extensions;
 using QNBFinansbank.VirtualPos.Utility.ResponseHandlers;
 using QNBFinansbank.VirtualPos.Utility.Serialization;
 using RestSharp;
@@ -233,7 +234,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     Currency = refund?.Order?.Currency,
                     Lang = refund?.Order?.Language,
                     OrderId = refund?.Order?.OrderId,
-                    PurchAmount = refund?.Order?.Amount,
+                    PurchAmount = refund?.Order?.Amount?.ToQnbFormat(),
 
                     MbrId = refund?.Account?.MbrId,
                     MerchantID = refund?.Account?.MerchantId,
@@ -414,7 +415,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     Currency = preAuthRequest?.Order?.Currency,
                     Lang = preAuthRequest?.Order?.Language,
                     OrderId = preAuthRequest?.Order?.OrderId,
-                    PurchAmount = preAuthRequest?.Order?.Amount,
+                    PurchAmount = preAuthRequest?.Order?.Amount?.ToQnbFormat(),
 
                     MbrId = preAuthRequest?.Account?.MbrId,
                     MerchantID = preAuthRequest?.Account?.MerchantId,
@@ -584,7 +585,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     Expiry = $"{useRewardPointsRequestDto?.Card?.ExpireMonth}{useRewardPointsRequestDto?.Card?.ExpireYear}",
 
                     BonusAmount = useRewardPointsRequestDto?.Order?.BonusAmount,
-                    PurchAmount = useRewardPointsRequestDto?.Order?.Amount,
+                    PurchAmount = useRewardPointsRequestDto?.Order?.Amount?.ToQnbFormat(),
 
                     MbrId = useRewardPointsRequestDto?.Account?.MbrId,
                     MerchantID = useRewardPointsRequestDto?.Account?.MerchantId,
@@ -1007,7 +1008,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     Pan = campaignCheckRequest?.Card?.CardNo,
                     Cvv2 = campaignCheckRequest?.Card?.CVC,
                     Expiry = $"{campaignCheckRequest?.Card?.ExpireMonth}{campaignCheckRequest?.Card?.ExpireYear}",
-                    PurchAmount = campaignCheckRequest?.Order?.Amount,
+                    PurchAmount = campaignCheckRequest?.Order?.Amount?.ToQnbFormat(),
 
                     MbrId = campaignCheckRequest?.Account?.MbrId,
                     MerchantId = campaignCheckRequest?.Account?.MerchantId,
@@ -1095,7 +1096,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     Pan = campaignUsageRequest?.Card?.CardNo,
                     Cvv2 = campaignUsageRequest?.Card?.CVC,
                     Expiry = $"{campaignUsageRequest?.Card?.ExpireMonth}{campaignUsageRequest?.Card?.ExpireYear}",
-                    PurchAmount = campaignUsageRequest?.Order?.Amount,
+                    PurchAmount = campaignUsageRequest?.Order?.Amount?.ToQnbFormat(),
 
                     ArtiTaksitSayisi = campaignUsageRequest?.ExtraInstallmentCount,
                     ArtiTaksitKampanyaKodu = campaignUsageRequest?.ExtraInstallmentCampaignCode,
@@ -1187,7 +1188,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     Currency = recurringPaymentRequestDto?.Order?.Currency,
                     MrcOrderId = recurringPaymentRequestDto?.Order?.OrderId,
                     InstallmentCount = recurringPaymentRequestDto?.Order?.Installment,
-                    PurchAmount = recurringPaymentRequestDto?.Order?.Amount,
+                    PurchAmount = recurringPaymentRequestDto?.Order?.Amount?.ToQnbFormat(),
 
                     Pan = recurringPaymentRequestDto?.Card?.CardNo,
                     Expiry = $"{recurringPaymentRequestDto?.Card?.ExpireMonth}{recurringPaymentRequestDto?.Card?.ExpireYear}",
@@ -1392,7 +1393,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     Currency = startPayment?.Order?.Currency,
                     Lang = startPayment?.Order?.Language,
                     OrderId = startPayment?.Order?.OrderId,
-                    PurchAmount = startPayment?.Order?.Amount,
+                    PurchAmount = startPayment?.Order?.Amount?.ToQnbFormat(),
                     InstallmentCount = startPayment?.Order?.Installment == "1" ? "0" : startPayment?.Order?.Installment,
 
                     MbrId = startPayment?.Account?.MbrId,
@@ -1496,7 +1497,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
                     Currency = startPayment?.Order?.Currency,
                     Lang = startPayment?.Order?.Language,
                     OrderId = startPayment?.Order?.OrderId,
-                    PurchAmount = startPayment?.Order?.Amount,
+                    PurchAmount = startPayment?.Order?.Amount?.ToQnbFormat(),
                     InstallmentCount = startPayment?.Order?.Installment == "1" ? "0" : startPayment?.Order?.Installment,
 
                     MbrId = startPayment?.Account?.MbrId,
@@ -1561,7 +1562,7 @@ namespace QNBFinansbank.VirtualPos.Business.Concrete
         /// </returns>
         private static string PaymentHashHelper(AccountDto? account, OrderDto? order)
         {
-            string hashString = $"{account?.MbrId}{order?.OrderId}{order?.Amount}{order?.ReturnUrl}{order?.ReturnUrl}{account?.TxnType}{(order?.Installment == "1" ? "0" : order?.Installment)}{order?.Random}{account?.MerchantPass}";
+            string hashString = $"{account?.MbrId}{order?.OrderId}{order?.Amount?.ToQnbFormat()}{order?.ReturnUrl}{order?.ReturnUrl}{account?.TxnType}{(order?.Installment == "1" ? "0" : order?.Installment)}{order?.Random}{account?.MerchantPass}";
             string hash = CryptoManager.SHA1Encryption(hashString);
             return hash;
         }

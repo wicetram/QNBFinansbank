@@ -1,9 +1,4 @@
 ﻿using RestSharp;
-using System.Text;
-using System.Xml.Serialization;
-using System.Xml;
-using QNBFinansbank.VirtualPos.Entity.Request.Check;
-using QNBFinansbank.VirtualPos.Utility.Serialization;
 
 namespace QNBFinansbank.VirtualPos.Utility.ApiClient
 {
